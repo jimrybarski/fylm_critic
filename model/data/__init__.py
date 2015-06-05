@@ -1,4 +1,3 @@
-from service.io import DataIO
 from tables import IsDescription
 
 
@@ -15,7 +14,6 @@ class DataFactory(object):
                      "fluorescence": FluorescenceData,
                      "puncta": PunctaData
                      }
-
         return data_unit[name]()
 
 
@@ -43,7 +41,7 @@ class FirstFrameData(BaseData):
         super(FirstFrameData, self).__init__()
         self._dependencies = None
         self._name = "first_frame"
-        self._source = "first_nd2_frame"
+        self._source = "first_frame"
 
 
 class RotationData(BaseData):
@@ -51,7 +49,7 @@ class RotationData(BaseData):
         super(RotationData, self).__init__()
         self._dependencies = None
         self._name = "rotation"
-        self._source = "first_nd2_frame"
+        self._source = "first_frame"
 
 
 class RegistrationData(BaseData):
@@ -59,7 +57,7 @@ class RegistrationData(BaseData):
         super(RegistrationData, self).__init__()
         self._dependencies = ["first_frame"]
         self._name = "registration"
-        self._source = "nd2"
+        self._source = "raw_image"
 
 
 class TimestampData(BaseData):
@@ -67,7 +65,7 @@ class TimestampData(BaseData):
         super(TimestampData, self).__init__()
         self._dependencies = None
         self._name = "timestamp"
-        self._source = "nd2"
+        self._source = "raw_image"
         self._data = {}
 
 
@@ -76,7 +74,7 @@ class LocationData(BaseData):
         super(LocationData, self).__init__()
         self._dependencies = ["first_frame", "rotation"]
         self._name = "location"
-        self._source = "nd2"
+        self._source = "raw_image"
 
 
 class KymographData(BaseData):
