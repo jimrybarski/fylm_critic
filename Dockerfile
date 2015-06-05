@@ -22,3 +22,6 @@ RUN pip3 install \
 
 # Get cross-correlation registration method
 RUN pip3 install --upgrade scikit-image
+
+# Copy over FYLM Critic
+COPY . /opt/
