@@ -1,6 +1,4 @@
 import logging
-from model.experiment import Experiment
-from model.plan import Plan
 import argparse
 
 # Show us all log messages in the terminal as the program runs
@@ -50,18 +48,3 @@ except:
 
     ==========================================================================
     """)
-
-
-experiment = Experiment("/var/data")
-data_units_from_cli = ["first_frame",
-                       "rotation",
-                       "registration",
-                       "timestamp",
-                       "location",
-                       "kymograph",
-                       "annotation",
-                       "movie",
-                       "fluorescence",
-                       "puncta"]
-
-plan = Plan(data_units_from_cli)
