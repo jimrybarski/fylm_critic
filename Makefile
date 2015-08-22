@@ -1,5 +1,4 @@
 build:
-	docker build -f DockerfileBase -t jimrybarski/fylmcritic_base .
 	docker build -t jimrybarski/fylmcritic .
 
 test:	build
