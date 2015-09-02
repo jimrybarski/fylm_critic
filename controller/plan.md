@@ -10,3 +10,4 @@ exceptions.
   - kymograph: make kymographs from old pole cells
   - movie: makes movies
   - analyze: extracts information from defined cells (fluorescence, puncta, etc.)
+  - train: select data for supervised learning processes
