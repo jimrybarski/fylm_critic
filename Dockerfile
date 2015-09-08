@@ -19,7 +19,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && pip3 install --upgrade \
         nd2reader \
         scikit-image \
+    && apt-get remove -y \
+       build-essential \
+       pkg-config \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
-ONBUILD COPY . /opt/
+COPY . /opt/

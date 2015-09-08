@@ -1,3 +1,8 @@
+.PHONY: info build test run
+
+info:
+	@echo "make build|test|run"
+
 build:
 	docker build -t jimrybarski/fylmcritic .
 
