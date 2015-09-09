@@ -24,5 +24,3 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
        pkg-config \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
-
-COPY . /opt/
