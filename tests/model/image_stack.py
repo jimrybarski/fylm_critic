@@ -23,12 +23,12 @@ class ImageStackTests(unittest.TestCase):
 
     def test_getitem(self):
         stack = ImageStack()
-        image_set = {"1": 1, "2": 2}
-        image_set2 = {"1": 1, "2": 2, "3": 3}
+        image_set = {0: "image0", 1: "image1"}
+        image_set2 = {0: "image2", 1: "image3", 2: "image4"}
         stack.add(image_set)
         stack.add(image_set2)
-        self.assertTupleEqual(stack[0], (0, 0))
-        self.assertTupleEqual(stack[1], (0, 1))
-        self.assertTupleEqual(stack[2], (1, 0))
-        self.assertTupleEqual(stack[3], (1, 1))
-        self.assertTupleEqual(stack[4], (1, 2))
+        self.assertEqual(stack[0], "image0")
+        self.assertEqual(stack[1], "image1")
+        self.assertEqual(stack[2], "image2")
+        self.assertEqual(stack[3], "image3")
+        self.assertEqual(stack[4], "image4")
