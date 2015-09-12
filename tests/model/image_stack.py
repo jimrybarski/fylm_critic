@@ -1,5 +1,10 @@
 import unittest
-from model.image_stack import ImageStack
+from model.image.stack import ImageStack
+
+
+class MockImage(object):
+    def __init__(self):
+        self.data = "image_data"
 
 
 class ImageStackTests(unittest.TestCase):
