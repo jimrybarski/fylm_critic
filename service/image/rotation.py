@@ -60,4 +60,5 @@ class V1Rotator(Rotator):
             offset = sum(angles) / len(angles) * 180.0 / math.pi
             if offset > V1Rotator.ACCEPTABLE_SKEW_THRESHOLD:
                 log.warn("Image is heavily skewed. Check that the images are valid.")
+            log.debug("Calculated rotation skew: %s" % offset)
             return offset
