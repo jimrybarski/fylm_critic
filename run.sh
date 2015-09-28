@@ -5,5 +5,5 @@ if [ -z $1 ]; then
     echo "Example:  ./run.sh /home/susie/experimental_data/150421"
     echo ""
 else
-    make run "$@"
+    experiment_directory="$@" make shell
 fi
