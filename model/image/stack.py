@@ -7,8 +7,6 @@ class ImageStack(object):
     def __init__(self):
         self._image_sets = {}
         self._image_lookup = {}
-        self._translator = None
-        self._rotator = None
         self._field_of_view = None
         self._z_level = None
         self._channel = None
