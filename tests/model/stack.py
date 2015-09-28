@@ -7,6 +7,7 @@ class MockImage(object):
         self.data = "image_data"
         self.field_of_view = field_of_view
 
+
 class ImageStackTests(unittest.TestCase):
     def test_add_correct_length(self):
         """ Does adding image sets result in the correct length for the stack? """
