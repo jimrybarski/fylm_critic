@@ -1,16 +1,16 @@
-.PHONY: info build test run
+.PHONY: info build test run shell
 
 info:
-	@echo "make build|test|run"
+	@echo "make build|test|run|shell"
 
 build:
 	docker build -t jimrybarski/fylmcritic .
 
-test:	build
-	docker run --rm -v ~/code/fylm3:/opt/ -it jimrybarski/fylmcritic python3.4 /opt/tests.py
+test:	
+	docker run --rm -v $(CURDIR):/opt/ -it jimrybarski/fylmcritic python3.4 /opt/tests.py
 
-run:	build
-	docker run --rm -v ~/code/fylm3:/opt/ -v $(experiment_directory):/var/data -it jimrybarski/fylmcritic python3.4 /opt/run.py
+run:	
+	docker run --rm -v $(CURDIR):/opt/ -v $(experiment_directory):/var/data -it jimrybarski/fylmcritic python3.4 /opt/run.py
 
-shell:	build
-	docker run --rm -v ~/code/fylm3:/opt/ -v $(experiment_directory):/var/data -it jimrybarski/fylmcritic bash
+shell:	
+	docker run --rm -v $(CURDIR):/opt/ -v $(experiment_directory):/var/data -it jimrybarski/fylmcritic bash

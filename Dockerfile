@@ -6,16 +6,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-dev \
     python3-numpy \
     python3-pip \
-    python3-tables \
+    python3-h5py \
     python3-scipy \
     python3-skimage \
     libfreetype6-dev \
     python3-matplotlib \
     python3-pyqt5 \
-    libfreetype6-dev \
     libpng-dev \
     libjpeg-dev \
     pkg-config \
+    && pip3 install --upgrade \
+        Cython \
     && pip3 install --upgrade \
         nd2reader \
         scikit-image \
