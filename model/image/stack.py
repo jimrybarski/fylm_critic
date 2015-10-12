@@ -1,7 +1,7 @@
 class ImageStack(object):
     """
-    This is a model that combines multiple ND2s into one logical image set. Other file types may be used if they are in an object that exposes
-    images via __getitem__ and defines __len__ as the number of images.
+    This is a model that combines multiple ND2s into one logical image set. Other file types may be used if they are in
+    an object that exposes the same interface as nd2reader.
 
     """
     def __init__(self):
@@ -12,10 +12,15 @@ class ImageStack(object):
         self._channel = None
 
     def add(self, image_set):
-        """ Adds a set of images to the virtual image stack. The order that sets are added determines the order of the final stack! """
+        """
+        Adds a set of images to the virtual image stack.
+        The order that sets are added determines the order of the final stack!
+
+        """
         # ensure the image set is valid
         if not (hasattr(image_set, "__getitem__") and hasattr(image_set, "__len__")):
-            raise TypeError("You tried to add an image set to the ImageStack but it doesn't provide the right interface (__getitem__ and __len__)")
+            raise TypeError("You tried to add an image set to the ImageStack,"
+                            " but it doesn't provide the right interface (__getitem__ and __len__)")
         # we need a new slot in our _image_sets dictionary for the new image set we've just been given
         # since we want the last index plus one, we can just use the length of _image_sets
         image_set_index = len(self._image_sets)
@@ -24,7 +29,8 @@ class ImageStack(object):
         image_count = len(self._image_lookup)
         # We use range(len()) instead of iteration over the image set to avoid reading any data from disk
         for i in range(len(image_set)):
-            # for each image, we create a new global index number, and map that to the particular image set it came from and its local index number
+            # for each image, we create a new global index number, and map that to the particular image set it came
+            # from and its local index number
             self._image_lookup[image_count + i] = (image_set_index, i)
         # here we just store the image set so we can access the images from it
         self._image_sets[image_set_index] = image_set
@@ -38,8 +44,9 @@ class ImageStack(object):
             raise TypeError("ImageStack uses integer indexes only.")
         if not 0 <= index < len(self):
             raise IndexError("Out of bounds index access for ImageStack")
-        # We have several sets of images, each indexed from 0 to some arbitrary number. We need to figure out which image set the given index maps to
-        # Once we know the image set, we also need to know which image we should use
+        # We have several sets of images, each indexed from 0 to some arbitrary number. We need to figure out which
+        # image set the given index maps to which file. Once we know the image set, we also need to know which image
+        # we should use.
         image_set_index, image_index = self._image_lookup[index]
         return self._image_sets[image_set_index][image_index]
 
