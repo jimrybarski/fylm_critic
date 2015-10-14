@@ -21,7 +21,7 @@ class RotationCorrector(object):
         self._offsets = offsets
 
     def adjust(self, image):
-        return self._rotate(image, self._offsets.get(image.frame_number))
+        return self._rotate(image, self._offsets[image.frame_number])
 
     @staticmethod
     def _rotate(image: np.array, degrees: float) -> np.array:
