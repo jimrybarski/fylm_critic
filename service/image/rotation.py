@@ -29,7 +29,7 @@ class RotationCorrector(object):
 
 
 class V1RotationAnalyzer(object):
-    def calculate_skew(self, image_stack, offsets: RotationOffsets, interval: int=500) -> RotationOffsets:
+    def determine_offsets(self, image_stack, offsets: RotationOffsets, interval: int=500) -> RotationOffsets:
         start_frame = offsets.last_real_value + interval
         if start_frame < len(image_stack):
             for image in image_stack[start_frame::interval]:
@@ -37,7 +37,8 @@ class V1RotationAnalyzer(object):
                 offsets[image.frame_number] = skew
         return offsets
 
-    def _calculate_skew(self, image: np.array) -> float:
+    @staticmethod
+    def _calculate_skew(image: np.array) -> float:
         """
         Determines the rotational skew of an image of a Version 1 FYLM device (the one with 28 channels per field of
         view and a large central trench.
