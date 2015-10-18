@@ -10,7 +10,7 @@ test:
 	docker run --rm -v $(CURDIR):/opt/ -it jimrybarski/fylmcritic python3.4 /opt/tests.py
 
 run:	
-	docker run --rm -v $(CURDIR):/opt/ -v $(experiment_directory):/var/data -it jimrybarski/fylmcritic python3.4 /opt/run.py
+	xhost local:root; docker run --rm -v $(CURDIR):/opt/ -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$(DISPLAY) -it jimrybarski/fylmcritic python3.4 /opt/bug.py --verbose-helpful
 
 shell:	
-	docker run --rm -v $(CURDIR):/opt/ -v $(experiment_directory):/var/data -it jimrybarski/fylmcritic bash
+	xhost local:root; docker run --rm -v $(CURDIR):/opt/ -v $(experiment_directory):/var/data -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$(DISPLAY) -it jimrybarski/fylmcritic bash
