@@ -30,12 +30,21 @@ class RotationCorrector(object):
 
 class V1RotationAnalyzer(object):
     def determine_offsets(self, image_stack, offsets: RotationOffsets, interval: int=500) -> RotationOffsets:
-        start_frame = offsets.last_real_value + interval
+        # We may only be partially done determining offsets. We'll pick up where we left off (or start at the beginning)
+        start_frame = self._get_start_frame(offsets, interval)
         if start_frame < len(image_stack):
-            for image in image_stack[start_frame::interval]:
-                skew = self._calculate_skew(image)
-                offsets[image.frame_number] = skew
+            self._calculate_offsets(image_stack, start_frame, interval, offsets)
         return offsets
+
+    def _calculate_offsets(self, image_stack, start_frame, interval, offsets):
+        # we still have some work to do
+        for image in image_stack[start_frame::interval]:
+            skew = self._calculate_skew(image)
+            offsets[image.frame_number] = skew
+
+    @staticmethod
+    def _get_start_frame(offsets, interval):
+        return offsets.last_real_value + interval if offsets.last_real_value is not None else 0
 
     @staticmethod
     def _calculate_skew(image: np.array) -> float:
@@ -44,7 +53,7 @@ class V1RotationAnalyzer(object):
         view and a large central trench.
 
         """
-        ACCEPTABLE_SKEW_THRESHOLD = 5.0
+        acceptable_skew_threshold = 5.0
 
         vertical_edges = vsobel(image)
         # Convert the greyscale edge information into black and white (ie binary) image
@@ -74,7 +83,7 @@ class V1RotationAnalyzer(object):
         else:
             # Get the average angle and convert it to degrees
             offset = sum(angles) / len(angles) * 180.0 / math.pi
-            if offset > ACCEPTABLE_SKEW_THRESHOLD:
+            if offset > acceptable_skew_threshold:
                 log.warn("Image is heavily skewed. Check that the images are valid.")
             log.debug("Calculated rotation skew: %s" % offset)
             return offset

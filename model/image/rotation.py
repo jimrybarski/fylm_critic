@@ -29,5 +29,6 @@ class RotationOffsets(object):
         Finds the highest frame number for which we have a record. We use this to prevent redoing work.
 
         """
-        assert len(self._values) > 0
-        return max(self._values.keys())
+        if self._values:
+            return max(self._values.keys())
+        return None
