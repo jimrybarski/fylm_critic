@@ -12,6 +12,7 @@ class RotationOffsets(object):
 
         """
         assert frame_number >= 0
+        assert frame_number >= min(self._values.keys())
         offset = self._values.get(frame_number)
         if offset is not None:
             return offset
