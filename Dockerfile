@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && pip3 install --upgrade \
         Cython \
     && pip3 install --upgrade \
-        nd2reader \
+        nd2reader==1.1.3 \
         scikit-image \
     && apt-get remove -y \
        build-essential \

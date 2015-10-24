@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from service.image.rotation import RotationCorrector, V1RotationAnalyzer
-from model.image.rotation import RotationOffsets
+from model.image.offset import Offsets
 
 
 class MockImage(np.ndarray):
@@ -30,7 +30,7 @@ class RotationTests(unittest.TestCase):
         image = np.zeros((3, 3), dtype=np.bool)
         image[0][1] = 1
         image = MockImage(image)
-        offsets = RotationOffsets()
+        offsets = Offsets()
         offsets[0] = 90.0
         rotated = RotationCorrector(offsets).adjust(image).astype(np.bool)
         expected = np.zeros((3, 3), dtype=np.bool)
@@ -43,19 +43,11 @@ class V1RotationAnalyzerTests(unittest.TestCase):
     def setUp(self):
         self.analyzer = FakeV1RotationAnalyzer([4.0, 3.0, 2.0, 1.7])
 
-    def test_get_start_frame(self):
-        offsets = RotationOffsets()
-        self.assertIsNone(offsets.last_real_value)
-        offsets[0] = 90.0
-        self.assertEqual(0, offsets.last_real_value)
-        offsets[27] = 180.0
-        self.assertEqual(27, offsets.last_real_value)
-
     def test_calculate_offsets(self):
-        offsets = RotationOffsets()
+        offsets = Offsets()
         image = np.zeros((3, 3), dtype=np.bool)
         image_stack = [MockImage(image, frame_number=i) for i in range(100)]
-        self.analyzer._calculate_offsets(image_stack, 0, 25, offsets)
+        self.analyzer._calculate_offsets(image_stack, 25, offsets)
         self.assertEqual(offsets[0], 1.7)
         self.assertEqual(offsets[24], 1.7)
         self.assertEqual(offsets[25], 2.0)
@@ -67,13 +59,13 @@ class V1RotationAnalyzerTests(unittest.TestCase):
         self.assertEqual(offsets[99], 4.0)
 
     def test_calculate_offsets_some_work_done(self):
-        offsets = RotationOffsets()
+        offsets = Offsets()
         offsets[0] = 1.0
         offsets[25] = 2.0
         offsets[50] = 3.0
         image = np.zeros((3, 3), dtype=np.bool)
         image_stack = [MockImage(image, frame_number=i) for i in range(100)]
-        self.analyzer._calculate_offsets(image_stack, 75, 25, offsets)
+        self.analyzer._calculate_offsets(image_stack, 25, offsets)
         self.assertEqual(offsets[0], 1.0)
         self.assertEqual(offsets[24], 1.0)
         self.assertEqual(offsets[25], 2.0)
@@ -85,7 +77,7 @@ class V1RotationAnalyzerTests(unittest.TestCase):
         self.assertEqual(offsets[99], 1.7)
 
     def test_determine_offsets(self):
-        offsets = RotationOffsets()
+        offsets = Offsets()
         image = np.zeros((3, 3), dtype=np.bool)
         image_stack = [MockImage(image, frame_number=i) for i in range(100)]
         self.analyzer.determine_offsets(image_stack, offsets, 25)
@@ -100,7 +92,7 @@ class V1RotationAnalyzerTests(unittest.TestCase):
         self.assertEqual(offsets[99], 4.0)
 
     def test_determine_offsets_some_work_done(self):
-        offsets = RotationOffsets()
+        offsets = Offsets()
         offsets[0] = 1.0
         offsets[25] = 2.0
         offsets[50] = 3.0
@@ -118,7 +110,7 @@ class V1RotationAnalyzerTests(unittest.TestCase):
         self.assertEqual(offsets[99], 1.7)
 
     def test_determine_offsets_all_work_done(self):
-        offsets = RotationOffsets()
+        offsets = Offsets()
         offsets[0] = 9.0
         offsets[25] = 9.0
         offsets[50] = 9.0

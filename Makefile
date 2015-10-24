@@ -14,3 +14,6 @@ run:
 
 shell:	
 	xhost local:root; docker run --rm -v $(CURDIR):/opt/ -v $(experiment_directory):/var/data -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$(DISPLAY) -it jimrybarski/fylmcritic bash
+
+py3: 
+	xhost local:root; docker run --rm -v $(CURDIR):/opt/ -v /home/jim/nd2s/:/var/nd2s -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$(DISPLAY) -it jimrybarski/fylmcritic bash
