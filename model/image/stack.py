@@ -31,7 +31,7 @@ class ImageStack(object):
         # We will keep track of groups of images. At each field of view, images with unique combinations of channel and focus are taken together.
         # Then we move on to another field of view, which is considered another group. If we only have one field of view, a new group starts when
         # an image has the same channel and focus as one in the current group.
-        for n, image in enumerate(image_set):
+        for n in range(len(image_set)):
             # for each image, we create a new global index number, and map that to the particular image set it came
             # from and its local index number
             self._image_lookup[image_count + n] = (image_set_index, n)
@@ -40,7 +40,7 @@ class ImageStack(object):
 
     @property
     def group_count(self):
-        return sum([len(image_set.frames) for image_set in self._image_sets])
+        return sum([len(image_set.frames) for image_set in self._image_sets.values()])
 
     def __len__(self) -> int:
         """ The number of total images there are in all the image sets. """

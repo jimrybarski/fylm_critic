@@ -21,6 +21,9 @@ class V1RegistrationAnalyzer(object):
         # We know the absolute minimum
         first_image = self._get_first_out_of_focus_image(image_stack, channel)
         for unregistered_image in image_stack.filter(z_level=0, channel=channel, start=len(offsets)):
+            print(unregistered_image.field_of_view)
+            print(unregistered_image.z_level)
+            print(unregistered_image.timestamp)
             x, y = self._calculate_translation(first_image, unregistered_image)
             offsets[unregistered_image.frame_number] = (x, y)
             log.debug("Registration for frame %s: x:%s, y%s" % (unregistered_image.frame_number, x, y))
