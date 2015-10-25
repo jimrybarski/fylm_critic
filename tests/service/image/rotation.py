@@ -31,7 +31,7 @@ class RotationTests(unittest.TestCase):
         image[0][1] = 1
         image = MockImage(image)
         offsets = Offsets()
-        offsets[0] = 90.0
+        offsets.set(0, 0, 90.0)
         rotated = RotationCorrector(offsets).adjust(image).astype(np.bool)
         expected = np.zeros((3, 3), dtype=np.bool)
         expected[1][0] = 1
