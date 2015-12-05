@@ -14,18 +14,13 @@ class V1RegistrationAnalyzer(object):
         assert len(offsets) <= image_stack.frame_count
         if len(offsets) < image_stack.frame_count:
             self._calculate_offsets(image_stack, offsets, brightfield_channel_name)
-        print("calculated %s offsets!" % len(offsets))
         return offsets
 
     def _calculate_offsets(self, image_stack: ImageStack, offsets: Offsets, channel: str):
         # We can't tell if the work is done, since we don't know how many of the images in image_stack are in the
         # channel we want to use. We know the absolute minimum.
         first_image = self._get_first_out_of_focus_image(image_stack, channel)
-        n = 0
         for unregistered_image in image_stack.filter(z_level=0, channel=channel):
-            n += 1
-            if n > 100:
-                break
             x, y = self._calculate_translation(first_image, unregistered_image)
             offsets.set(unregistered_image.field_of_view, unregistered_image.frame_number, (x, y))
             log.debug("Registration for fov %s frame %s: x:%s, y:%s" % (unregistered_image.field_of_view,

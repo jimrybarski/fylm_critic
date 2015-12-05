@@ -15,11 +15,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-pyqt5 \
     libpng-dev \
     libjpeg-dev \
-    pkg-config
-
-RUN pip3 install --upgrade Cython \
+    pkg-config \
+    && pip3 install --upgrade Cython \
     && pip3 install --upgrade scikit-image \
-    && pip3 install git://github.com/jimrybarski/nd2reader@7f359bacc1aaac0900a51bd14d4b1fef777fe4db \
+    && pip3 install git+git://github.com/jimrybarski/nd2reader@7f359bacc1aaac0900a51bd14d4b1fef777fe4db \
     && apt-get remove -y \
        build-essential \
        git \

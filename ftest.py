@@ -14,4 +14,7 @@ stack.add(Nd2("/var/nd2s/FYLM-141111-001.nd2"))
 log.debug("Added nd2")
 
 reg = V1RegistrationAnalyzer()
-reg.determine_translation(stack, Offsets(), "")
+offsets = Offsets()
+reg.determine_translation(stack, offsets, 'BF')
+from pprint import pprint
+pprint(offsets._offsets)

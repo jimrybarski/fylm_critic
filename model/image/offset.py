@@ -10,7 +10,7 @@ class Offsets(object):
         self._offsets = defaultdict(dict)
 
     def __len__(self):
-        return sum([len(value) for fov in self._offsets.values() for value in fov])
+        return sum([len(value) for fov in self._offsets.values() for value in fov.values()])
     
     def get(self, field_of_view: int, frame_number: int):
         """
