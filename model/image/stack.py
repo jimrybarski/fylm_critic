@@ -28,9 +28,10 @@ class ImageStack(object):
         # we need to know how many total images we already have, so when we index the new images in the new image set,
         # we can start from the next available index
         image_count = len(self._image_lookup)
-        # We will keep track of groups of images. At each field of view, images with unique combinations of channel and focus are taken together.
-        # Then we move on to another field of view, which is considered another group. If we only have one field of view, a new group starts when
-        # an image has the same channel and focus as one in the current group.
+        # We will keep track of groups of images. At each field of view, images with unique combinations of channel and
+        # focus are taken together. Then we move on to another field of view, which is considered another group.
+        # If we only have one field of view, a new group starts when an image has the same channel and focus as one in
+        # the current group.
         for n in range(len(image_set)):
             # for each image, we create a new global index number, and map that to the particular image set it came
             # from and its local index number
@@ -39,7 +40,7 @@ class ImageStack(object):
         self._image_sets[image_set_index] = image_set
 
     @property
-    def group_count(self):
+    def frame_count(self):
         return sum([len(image_set.frames) for image_set in self._image_sets.values()])
 
     def __len__(self) -> int:
@@ -57,10 +58,8 @@ class ImageStack(object):
         image_set_index, image_index = self._image_lookup[index]
         return self._image_sets[image_set_index][image_index]
 
-    def filter(self, field_of_view: int=None, z_level: int=None, channel: str=None, start: int=0):
+    def filter(self, field_of_view: int=None, z_level: int=None, channel: str=None):
         """ Returns an iterator over images that meet the given criteria. """
-        _filter_function = lambda image: image is not None and image.frame_number >= start and \
-                                         (field_of_view is None or image.field_of_view == field_of_view) and \
-                                         (z_level is None or image.z_level == z_level) and \
-                                         (channel is None or image.channel == channel)
-        return filter(_filter_function, self)
+        for _, image_set in sorted(self._image_sets.items()):
+            for image in image_set.filter(fields_of_view=field_of_view, z_levels=z_level, channels=channel):
+                yield image

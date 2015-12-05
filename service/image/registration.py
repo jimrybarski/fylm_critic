@@ -11,28 +11,33 @@ class V1RegistrationAnalyzer(object):
         log.debug("Registering!")
         # We may only be partially done determining offsets. We'll pick up where we left off (or start at the beginning)
         assert len(image_stack) > 0
-        assert len(offsets) <= image_stack.group_count
-        if len(offsets) < image_stack.group_count:
+        assert len(offsets) <= image_stack.frame_count
+        if len(offsets) < image_stack.frame_count:
             self._calculate_offsets(image_stack, offsets, brightfield_channel_name)
+        print("calculated %s offsets!" % len(offsets))
         return offsets
 
     def _calculate_offsets(self, image_stack: ImageStack, offsets: Offsets, channel: str):
-        # We can't tell if the work is done, since we don't know how many of the images in image_stack are in the channel we want to use.
-        # We know the absolute minimum
+        # We can't tell if the work is done, since we don't know how many of the images in image_stack are in the
+        # channel we want to use. We know the absolute minimum.
         first_image = self._get_first_out_of_focus_image(image_stack, channel)
-        for unregistered_image in image_stack.filter(z_level=0, channel=channel, start=len(offsets)):
-            print(unregistered_image.field_of_view)
-            print(unregistered_image.z_level)
-            print(unregistered_image.timestamp)
+        n = 0
+        for unregistered_image in image_stack.filter(z_level=0, channel=channel):
+            n += 1
+            if n > 100:
+                break
             x, y = self._calculate_translation(first_image, unregistered_image)
-            offsets[unregistered_image.frame_number] = (x, y)
-            log.debug("Registration for frame %s: x:%s, y%s" % (unregistered_image.frame_number, x, y))
+            offsets.set(unregistered_image.field_of_view, unregistered_image.frame_number, (x, y))
+            log.debug("Registration for fov %s frame %s: x:%s, y:%s" % (unregistered_image.field_of_view,
+                                                                        unregistered_image.frame_number,
+                                                                        x,
+                                                                        y))
 
     def _get_first_out_of_focus_image(self, image_stack: ImageStack, channel: str):
-        for image in image_stack:
-            if image.z_level == 0 and image.channel == channel:
-                return image
-        raise ValueError("Could not find an image to align the image stack against. You probably chose the wrong channel to do alignments with.")
+        for image in image_stack.filter(z_level=0, channel=channel):
+            return image
+        raise ValueError("Could not find an image to align the image stack against. You probably chose the wrong "
+                         "channel to do alignments with.")
 
     @staticmethod
     def _calculate_translation(base_image, uncorrected_image) -> (float, float):
@@ -57,8 +62,11 @@ class V1RegistrationAnalyzer(object):
 
         # phase_correlate returns y, x instead of x, y, which is not the convention in scikit-image, so we reverse them
         # it also returns some error bars and other stuff we don't need, so we just take the first two items
-        left_dy, left_dx = register_translation(left_base_section, left_uncorrected, upsample_factor=20)[:2]
-        right_dy, right_dx = register_translation(right_base_section, right_uncorrected, upsample_factor=20)[:2]
-        #
-        # # return the average of the left and right phase correlation corrections
+        (left_dy, left_dx), error, phase_diff = register_translation(left_base_section,
+                                                                     left_uncorrected,
+                                                                     upsample_factor=20)
+        (right_dy, right_dx), error, phase_diff = register_translation(right_base_section,
+                                                                       right_uncorrected,
+                                                                       upsample_factor=20)
+        # return the average of the left and right phase correlation corrections
         return (left_dx + right_dx) / 2.0, (left_dy + right_dy) / 2.0
