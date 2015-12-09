@@ -5,7 +5,7 @@ from scipy import ndimage
 from skimage.filters import rank, threshold_otsu, vsobel
 from skimage.morphology import disk, remove_small_objects, skeletonize
 from skimage import transform
-from model.image.rotation import RotationOffsets
+from model.image.offset import Offsets
 
 FIFTEEN_DEGREES_IN_RADIANS = 0.262
 
@@ -29,22 +29,17 @@ class RotationCorrector(object):
 
 
 class V1RotationAnalyzer(object):
-    def determine_offsets(self, image_stack, offsets: RotationOffsets, interval: int=500) -> RotationOffsets:
+    def determine_offsets(self, image_stack, offsets: Offsets, interval: int=500) -> Offsets:
         # We may only be partially done determining offsets. We'll pick up where we left off (or start at the beginning)
-        start_frame = self._get_start_frame(offsets, interval)
-        if start_frame < len(image_stack):
-            self._calculate_offsets(image_stack, start_frame, interval, offsets)
+        if (len(offsets) + interval) < len(image_stack):
+            self._calculate_offsets(image_stack, interval, offsets)
         return offsets
 
-    def _calculate_offsets(self, image_stack, start_frame, interval, offsets):
+    def _calculate_offsets(self, image_stack, interval, offsets):
         # we still have some work to do
-        for image in image_stack[start_frame::interval]:
+        for image in image_stack[len(offsets)::interval]:
             skew = self._calculate_skew(image)
             offsets[image.frame_number] = skew
-
-    @staticmethod
-    def _get_start_frame(offsets, interval):
-        return offsets.last_real_value + interval if offsets.last_real_value is not None else 0
 
     @staticmethod
     def _calculate_skew(image: np.array) -> float:

@@ -1,10 +1,10 @@
 import unittest
-from model.image.rotation import RotationOffsets
+from model.image.offset import Offsets
 
 
 class RotationOffsetsTests(unittest.TestCase):
     def setUp(self):
-        self.offsets = RotationOffsets()
+        self.offsets = Offsets()
         self.offsets._values = {0: 12.3, 560: 11.7, 1010: 1.3}
 
     def test_getitem_exact(self):
@@ -20,12 +20,12 @@ class RotationOffsetsTests(unittest.TestCase):
         self.assertEqual(self.offsets[900], 11.7)
 
     def test_setitem(self):
-        offsets = RotationOffsets()
+        offsets = Offsets()
         offsets[0] = 10.0
         self.assertEqual(offsets[0], 10.0)
         self.assertEqual(offsets[100], 10.0)
         self.assertEqual(offsets[1000], 10.0)
         self.assertEqual(offsets[10000], 10.0)
 
-    def test_last_real_value(self):
-        self.assertEqual(self.offsets.last_real_value, 1010)
+    def test_length(self):
+        self.assertEqual(len(self.offsets), 1010)

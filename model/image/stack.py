@@ -7,13 +7,14 @@ class ImageStack(object):
     def __init__(self):
         self._image_sets = {}
         self._image_lookup = {}
+        self._groups = {}
         self._field_of_view = None
         self._z_level = None
         self._channel = None
 
     def add(self, image_set):
         """
-        Adds a set of images to the virtual image stack.
+        Adds a set of images to the virtual image stack. Image sets are typically a single ND2 file.
         The order that sets are added determines the order of the final stack!
 
         """
@@ -27,13 +28,20 @@ class ImageStack(object):
         # we need to know how many total images we already have, so when we index the new images in the new image set,
         # we can start from the next available index
         image_count = len(self._image_lookup)
-        # We use range(len()) instead of iteration over the image set to avoid reading any data from disk
-        for i in range(len(image_set)):
+        # We will keep track of groups of images. At each field of view, images with unique combinations of channel and
+        # focus are taken together. Then we move on to another field of view, which is considered another group.
+        # If we only have one field of view, a new group starts when an image has the same channel and focus as one in
+        # the current group.
+        for n in range(len(image_set)):
             # for each image, we create a new global index number, and map that to the particular image set it came
             # from and its local index number
-            self._image_lookup[image_count + i] = (image_set_index, i)
+            self._image_lookup[image_count + n] = (image_set_index, n)
         # here we just store the image set so we can access the images from it
         self._image_sets[image_set_index] = image_set
+
+    @property
+    def frame_count(self):
+        return sum([len(image_set.frames) for image_set in self._image_sets.values()])
 
     def __len__(self) -> int:
         """ The number of total images there are in all the image sets. """
@@ -52,7 +60,6 @@ class ImageStack(object):
 
     def filter(self, field_of_view: int=None, z_level: int=None, channel: str=None):
         """ Returns an iterator over images that meet the given criteria. """
-        _filter_function = lambda image: (field_of_view is None or image.field_of_view == field_of_view) and \
-                                         (z_level is None or image.z_level == z_level) and \
-                                         (channel is None or image.channel == channel)
-        return filter(_filter_function, self)
+        for _, image_set in sorted(self._image_sets.items()):
+            for image in image_set.filter(fields_of_view=field_of_view, z_levels=z_level, channels=channel):
+                yield image
