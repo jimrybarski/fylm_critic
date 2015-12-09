@@ -19,20 +19,28 @@ class V1RegistrationAnalyzer(object):
     def _calculate_offsets(self, image_stack: ImageStack, offsets: Offsets, channel: str):
         # We can't tell if the work is done, since we don't know how many of the images in image_stack are in the
         # channel we want to use. We know the absolute minimum.
-        first_image = self._get_first_out_of_focus_image(image_stack, channel)
+        first_images = self._get_first_out_of_focus_images(image_stack, channel)
         for unregistered_image in image_stack.filter(z_level=0, channel=channel):
-            x, y = self._calculate_translation(first_image, unregistered_image)
+            x, y = self._calculate_translation(first_images[unregistered_image.field_of_view], unregistered_image)
             offsets.set(unregistered_image.field_of_view, unregistered_image.frame_number, (x, y))
             log.debug("Registration for fov %s frame %s: x:%s, y:%s" % (unregistered_image.field_of_view,
                                                                         unregistered_image.frame_number,
                                                                         x,
                                                                         y))
 
-    def _get_first_out_of_focus_image(self, image_stack: ImageStack, channel: str):
-        for image in image_stack.filter(z_level=0, channel=channel):
-            return image
-        raise ValueError("Could not find an image to align the image stack against. You probably chose the wrong "
-                         "channel to do alignments with.")
+    def _get_first_out_of_focus_images(self, image_stack: ImageStack, channel: str) -> dict:
+        field_of_view_count = 8
+        images = {}
+        for n, image in enumerate(image_stack.filter(z_level=0, channel=channel)):
+            if n == field_of_view_count:
+                # There are always 8 fields of view
+                break
+            images[image.field_of_view] = image
+        if len(images) < field_of_view_count:
+            raise ValueError("Could not find an image to align the image stack against. You probably chose the wrong "
+                             "channel to do alignments with.")
+        assert max(images) < field_of_view_count
+        return images
 
     @staticmethod
     def _calculate_translation(base_image, uncorrected_image) -> (float, float):
