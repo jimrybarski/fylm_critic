@@ -52,18 +52,3 @@ class ImageStackTests(unittest.TestCase):
         stack.add(image_set2)
         images = [im for im in stack]
         self.assertEqual(len(images), 5)
-
-    def test_filter(self):
-        stack = ImageStack()
-        image_set = {0: MockImage(field_of_view=0), 1: MockImage(field_of_view=1)}
-        image_set2 = {0: MockImage(field_of_view=0), 1: MockImage(field_of_view=1), 2: MockImage(field_of_view=3)}
-        stack.add(image_set)
-        stack.add(image_set2)
-        fov0 = [im for im in stack.filter(field_of_view=0)]
-        fov1 = [im for im in stack.filter(field_of_view=1)]
-        fov2 = [im for im in stack.filter(field_of_view=2)]
-        fov3 = [im for im in stack.filter(field_of_view=3)]
-        self.assertEqual(len(fov0), 2)
-        self.assertEqual(len(fov1), 2)
-        self.assertEqual(len(fov2), 0)
-        self.assertEqual(len(fov3), 1)

@@ -2,10 +2,11 @@ import logging
 import math
 import numpy as np
 from scipy import ndimage
-from skimage.filters import rank, threshold_otsu, vsobel
+from skimage.filters import gaussian_filter, rank, threshold_otsu, sobel_v
 from skimage.morphology import disk, remove_small_objects, skeletonize
 from skimage import transform
-from model.image.offset import Offsets
+from model.image.offset import RotationOffsets
+from skimage import io
 
 FIFTEEN_DEGREES_IN_RADIANS = 0.262
 
@@ -21,7 +22,7 @@ class RotationCorrector(object):
         self._offsets = offsets
 
     def adjust(self, image):
-        return self._rotate(image, self._offsets[image.frame_number])
+        return self._rotate(image, self._offsets.get(image.field_of_view))
 
     @staticmethod
     def _rotate(image: np.array, degrees: float) -> np.array:
@@ -29,17 +30,19 @@ class RotationCorrector(object):
 
 
 class V1RotationAnalyzer(object):
-    def determine_offsets(self, image_stack, offsets: Offsets, interval: int=500) -> Offsets:
-        # We may only be partially done determining offsets. We'll pick up where we left off (or start at the beginning)
-        if (len(offsets) + interval) < len(image_stack):
-            self._calculate_offsets(image_stack, interval, offsets)
-        return offsets
+    FIELD_OF_VIEW_COUNT = 8
 
-    def _calculate_offsets(self, image_stack, interval, offsets):
+    def determine_offsets(self, image_stack, offsets: RotationOffsets, brightfield_channel_name: str) -> RotationOffsets:
+        # We may only be partially done determining offsets. We'll pick up where we left off (or start at the beginning)
+        self._calculate_offsets(image_stack, offsets, brightfield_channel_name)
+
+    def _calculate_offsets(self, image_stack, offsets, brightfield_channel_name):
         # we still have some work to do
-        for image in image_stack[len(offsets)::interval]:
-            skew = self._calculate_skew(image)
-            offsets[image.frame_number] = skew
+        for unrotated_image in image_stack.filter(z_level=1, channel=brightfield_channel_name):
+            skew = self._calculate_skew(unrotated_image)
+            offsets.set(unrotated_image.field_of_view, skew)
+            if len(offsets) == V1RotationAnalyzer.FIELD_OF_VIEW_COUNT:
+                break
 
     @staticmethod
     def _calculate_skew(image: np.array) -> float:
@@ -49,16 +52,18 @@ class V1RotationAnalyzer(object):
 
         """
         acceptable_skew_threshold = 5.0
-
-        vertical_edges = vsobel(image)
+        vertical_edges = sobel_v(image)
         # Convert the greyscale edge information into black and white (ie binary) image
         threshold = threshold_otsu(vertical_edges)
         # Filter out the edge data below the threshold, effectively removing some noise
         raw_channel_areas = vertical_edges <= threshold
         # Smooth out the data
-        channel_areas = rank.mean(raw_channel_areas, disk(9)) < 200
+        # channel_areas = rank.mean(raw_channel_areas, disk(9))
+        channel_areas = gaussian_filter(raw_channel_areas, 2)
+        io.imshow(channel_areas)
+        io.show()
         # Remove specks and blobs that are the result of artifacts
-        clean_channel_areas = remove_small_objects(channel_areas, min_size=500)
+        clean_channel_areas = remove_small_objects(channel_areas < 50, min_size=500)
         # Fill in any areas that are completely surrounded by the areas (hopefully) covering the channels
         segmentation = ndimage.binary_fill_holes(clean_channel_areas)
         # Draw a line that follows the center of the segments at each point, which should be roughly vertical
@@ -74,7 +79,7 @@ class V1RotationAnalyzer(object):
         angles = [angle for _, angle, dist in zip(*transform.hough_line_peaks(*hough))]
         if not angles:
             log.warn("Image skew could not be calculated. The image is probably invalid.")
-            return 0.0
+            return None
         else:
             # Get the average angle and convert it to degrees
             offset = sum(angles) / len(angles) * 180.0 / math.pi

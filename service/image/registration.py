@@ -1,5 +1,5 @@
 from skimage.feature import register_translation
-from model.image.offset import Offsets
+from model.image.offset import RegistrationOffsets, Point
 from model.image.stack import ImageStack
 import logging
 
@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 
 
 class V1RegistrationAnalyzer(object):
-    def determine_translation(self, image_stack: ImageStack, offsets: Offsets, brightfield_channel_name: str) -> Offsets:
+    def determine_translation(self, image_stack: ImageStack, offsets: RegistrationOffsets, brightfield_channel_name: str) -> RegistrationOffsets:
         log.debug("Registering!")
         # We may only be partially done determining offsets. We'll pick up where we left off (or start at the beginning)
         assert len(image_stack) > 0
@@ -16,13 +16,13 @@ class V1RegistrationAnalyzer(object):
             self._calculate_offsets(image_stack, offsets, brightfield_channel_name)
         return offsets
 
-    def _calculate_offsets(self, image_stack: ImageStack, offsets: Offsets, channel: str):
+    def _calculate_offsets(self, image_stack: ImageStack, offsets: RegistrationOffsets, channel: str):
         # We can't tell if the work is done, since we don't know how many of the images in image_stack are in the
         # channel we want to use. We know the absolute minimum.
         first_images = self._get_first_out_of_focus_images(image_stack, channel)
         for unregistered_image in image_stack.filter(z_level=0, channel=channel):
             x, y = self._calculate_translation(first_images[unregistered_image.field_of_view], unregistered_image)
-            offsets.set(unregistered_image.field_of_view, unregistered_image.frame_number, (x, y))
+            offsets.set(unregistered_image.field_of_view, unregistered_image.frame_number, Point(x=x, y=y))
             log.debug("Registration for fov %s frame %s: x:%s, y:%s" % (unregistered_image.field_of_view,
                                                                         unregistered_image.frame_number,
                                                                         x,
