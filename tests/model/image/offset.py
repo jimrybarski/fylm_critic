@@ -1,5 +1,24 @@
 import unittest
-from model.image.offset import RotationOffsets, RegistrationOffsets
+from model.image.offset import RotationOffsets, RegistrationOffsets, Point
+
+
+class RegistrationOffsetTests(unittest.TestCase):
+    def setUp(self):
+        self.offsets = RegistrationOffsets()
+
+    def test_get(self):
+        self.offsets._offsets[3][17] = Point(x=12.0, y=14.0)
+        self.assertEqual(self.offsets.get(3, 17), Point(x=12.0, y=14.0))
+
+    def test_set(self):
+        self.offsets.set(3, 19, Point(13.0, 19.1))
+        self.assertEqual(self.offsets._offsets[3][19], Point(13.0, 19.1))
+
+    def test_length(self):
+        self.offsets.set(3, 19, Point(13.0, 19.1))
+        self.offsets.set(3, 20, Point(14.0, 19.1))
+        self.offsets.set(1, 0, Point(15.0, 19.1))
+        self.assertEqual(len(self.offsets), 3)
 
 
 class RotationOffsetsTests(unittest.TestCase):

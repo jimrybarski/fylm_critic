@@ -58,8 +58,8 @@ class ImageStack(object):
         image_set_index, image_index = self._image_lookup[index]
         return self._image_sets[image_set_index][image_index]
 
-    def filter(self, field_of_view: int=None, z_level: int=None, channel: str=None):
+    def select(self, fields_of_view: int=None, z_levels: int=None, channels: str=None):
         """ Returns an iterator over images that meet the given criteria. """
         for _, image_set in sorted(self._image_sets.items()):
-            for image in image_set.filter(fields_of_view=field_of_view, z_levels=z_level, channels=channel):
+            for image in image_set.select(fields_of_view=fields_of_view, z_levels=z_levels, channels=channels):
                 yield image

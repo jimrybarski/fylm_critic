@@ -38,7 +38,7 @@ class V1RotationAnalyzer(object):
 
     def _calculate_offsets(self, image_stack, offsets, brightfield_channel_name):
         # we still have some work to do
-        for unrotated_image in image_stack.filter(z_level=1, channel=brightfield_channel_name):
+        for unrotated_image in image_stack.select(z_levels=1, channels=brightfield_channel_name):
             skew = self._calculate_skew(unrotated_image)
             offsets.set(unrotated_image.field_of_view, skew)
             if len(offsets) == V1RotationAnalyzer.FIELD_OF_VIEW_COUNT:
@@ -51,7 +51,7 @@ class V1RotationAnalyzer(object):
         view and a large central trench.
 
         """
-        acceptable_skew_threshold = 5.0
+        acceptable_skew_threshold = 5.0  # degrees
         vertical_edges = sobel_v(image)
         # Convert the greyscale edge information into black and white (ie binary) image
         threshold = threshold_otsu(vertical_edges)
@@ -82,8 +82,8 @@ class V1RotationAnalyzer(object):
             return None
         else:
             # Get the average angle and convert it to degrees
-            offset = sum(angles) / len(angles) * 180.0 / math.pi
-            if offset > acceptable_skew_threshold:
+            offset_in_degrees = sum(angles) / len(angles) * 180.0 / math.pi
+            if offset_in_degrees > acceptable_skew_threshold:
                 log.warn("Image is heavily skewed. Check that the images are valid.")
-            log.debug("Calculated rotation skew: %s" % offset)
-            return offset
+            log.debug("Calculated rotation skew: %s degrees" % offset_in_degrees)
+            return offset_in_degrees

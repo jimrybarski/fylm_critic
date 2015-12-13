@@ -14,7 +14,7 @@ class RegistrationOffsets(object):
         self._offsets = defaultdict(dict)
 
     def __len__(self):
-        return sum([len(value) for fov in self._offsets.values() for value in fov.values()])
+        return sum([len(fov) for fov in self._offsets.values()])
     
     def get(self, field_of_view: int, frame_number: int) -> Point:
         assert frame_number >= 0

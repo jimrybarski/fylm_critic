@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
     && pip3 install --upgrade Cython \
     && pip3 install --upgrade scikit-image \
-    && pip3 install git+git://github.com/jimrybarski/nd2reader@7f359bacc1aaac0900a51bd14d4b1fef777fe4db \
+    && pip3 install git+git://github.com/jimrybarski/nd2reader@ad9cdcd2ade44832ff09e1e0f43b673fde4ede17 \
     && apt-get remove -y \
        build-essential \
        git \
@@ -27,3 +27,4 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 ONBUILD COPY . /opt/
+WORKDIR /opt
