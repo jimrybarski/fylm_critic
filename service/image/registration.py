@@ -20,7 +20,7 @@ class V1RegistrationAnalyzer(object):
         # We can't tell if the work is done, since we don't know how many of the images in image_stack are in the
         # channel we want to use. We know the absolute minimum.
         first_images = self._get_first_out_of_focus_images(image_stack, channel)
-        for unregistered_image in image_stack.filter(z_level=0, channel=channel):
+        for unregistered_image in image_stack.select(z_levels=0, channels=channel):
             x, y = self._calculate_translation(first_images[unregistered_image.field_of_view], unregistered_image)
             offsets.set(unregistered_image.field_of_view, unregistered_image.frame_number, Point(x=x, y=y))
             log.debug("Registration for fov %s frame %s: x:%s, y:%s" % (unregistered_image.field_of_view,
@@ -31,7 +31,7 @@ class V1RegistrationAnalyzer(object):
     def _get_first_out_of_focus_images(self, image_stack: ImageStack, channel: str) -> dict:
         field_of_view_count = 8
         images = {}
-        for n, image in enumerate(image_stack.filter(z_level=0, channel=channel)):
+        for n, image in enumerate(image_stack.select(z_levels=0, channels=channel)):
             if n == field_of_view_count:
                 # There are always 8 fields of view
                 break

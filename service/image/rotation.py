@@ -2,11 +2,10 @@ import logging
 import math
 import numpy as np
 from scipy import ndimage
-from skimage.filters import gaussian_filter, rank, threshold_otsu, sobel_v
-from skimage.morphology import disk, remove_small_objects, skeletonize, binary_opening
+from skimage.filters import gaussian_filter, threshold_otsu, sobel_v
+from skimage.morphology import remove_small_objects, skeletonize, binary_opening
 from skimage import transform
 from model.image.offset import RotationOffsets
-from skimage import io
 import statistics
 
 
