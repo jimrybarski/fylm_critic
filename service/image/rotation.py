@@ -3,10 +3,12 @@ import math
 import numpy as np
 from scipy import ndimage
 from skimage.filters import gaussian_filter, rank, threshold_otsu, sobel_v
-from skimage.morphology import disk, remove_small_objects, skeletonize
+from skimage.morphology import disk, remove_small_objects, skeletonize, binary_opening
 from skimage import transform
 from model.image.offset import RotationOffsets
 from skimage import io
+import statistics
+
 
 FIFTEEN_DEGREES_IN_RADIANS = 0.262
 
@@ -57,13 +59,12 @@ class V1RotationAnalyzer(object):
         threshold = threshold_otsu(vertical_edges)
         # Filter out the edge data below the threshold, effectively removing some noise
         raw_channel_areas = vertical_edges <= threshold
+        opening = binary_opening(raw_channel_areas)
         # Smooth out the data
         # channel_areas = rank.mean(raw_channel_areas, disk(9))
-        channel_areas = gaussian_filter(raw_channel_areas, 2)
-        io.imshow(channel_areas)
-        io.show()
+        channel_areas = gaussian_filter(opening, 5)
         # Remove specks and blobs that are the result of artifacts
-        clean_channel_areas = remove_small_objects(channel_areas < 50, min_size=500)
+        clean_channel_areas = remove_small_objects(channel_areas < np.mean(channel_areas), min_size=500)
         # Fill in any areas that are completely surrounded by the areas (hopefully) covering the channels
         segmentation = ndimage.binary_fill_holes(clean_channel_areas)
         # Draw a line that follows the center of the segments at each point, which should be roughly vertical
@@ -82,7 +83,7 @@ class V1RotationAnalyzer(object):
             return None
         else:
             # Get the average angle and convert it to degrees
-            offset_in_degrees = sum(angles) / len(angles) * 180.0 / math.pi
+            offset_in_degrees = statistics.mean(angles) * 180.0 / math.pi
             if offset_in_degrees > acceptable_skew_threshold:
                 log.warn("Image is heavily skewed. Check that the images are valid.")
             log.debug("Calculated rotation skew: %s degrees" % offset_in_degrees)

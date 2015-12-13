@@ -4,6 +4,12 @@ from model.image.offset import RotationOffsets
 from nd2reader import Nd2
 from skimage import io, transform
 import logging
+import time
+import numpy as np
+from scipy import ndimage
+from skimage.filters import gaussian_filter, rank, threshold_otsu, sobel_v
+from skimage.morphology import disk, remove_small_objects, skeletonize
+
 
 log = logging.getLogger()
 log.addHandler(logging.StreamHandler())
@@ -13,16 +19,22 @@ log.setLevel(logging.DEBUG)
 stack = ImageStack()
 stack.add(Nd2("/var/nd2s/FYLM-141111-001.nd2"))
 
+
+def show(image):
+    io.imshow(image)
+    io.show()
+    time.sleep(0.2)
+
 reg = V1RotationAnalyzer()
 offsets = RotationOffsets()
 reg.determine_offsets(stack, offsets, 'BF')
-for image in stack.select(z_level=1, channel='BF'):
+for image in stack.select(z_levels=1, channels='BF'):
     skew = offsets.get(image.field_of_view)
     timage = transform.rotate(image, skew)
     fname = "/var/nd2s/images/%s_%s_original.png" % (image.field_of_view, image.frame_number)
     tfname = "/var/nd2s/images/%s_%s_rotated.png" % (image.field_of_view, image.frame_number)
     log.debug(tfname)
-    io.imsave(tfname, timage)
-    io.imsave(fname, image)
     if image.frame_number == 1:
         break
+    io.imsave(tfname, timage)
+    io.imsave(fname, image)
