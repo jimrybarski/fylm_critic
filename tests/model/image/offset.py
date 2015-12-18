@@ -1,31 +1,44 @@
 import unittest
-from model.image.offset import Offsets
+from model.image.offset import RotationOffsets, RegistrationOffsets, Point
+
+
+class RegistrationOffsetTests(unittest.TestCase):
+    def setUp(self):
+        self.offsets = RegistrationOffsets()
+
+    def test_get(self):
+        self.offsets._offsets[3][17] = Point(x=12.0, y=14.0)
+        self.assertEqual(self.offsets.get(3, 17), Point(x=12.0, y=14.0))
+
+    def test_set(self):
+        self.offsets.set(3, 19, Point(13.0, 19.1))
+        self.assertEqual(self.offsets._offsets[3][19], Point(13.0, 19.1))
+
+    def test_length(self):
+        self.offsets.set(3, 19, Point(13.0, 19.1))
+        self.offsets.set(3, 20, Point(14.0, 19.1))
+        self.offsets.set(1, 0, Point(15.0, 19.1))
+        self.assertEqual(len(self.offsets), 3)
 
 
 class RotationOffsetsTests(unittest.TestCase):
     def setUp(self):
-        self.offsets = Offsets()
-        self.offsets._values = {0: 12.3, 560: 11.7, 1010: 1.3}
+        self.offsets = RotationOffsets()
+        self.offsets._offsets = {0: 11.7, 1: 178.0, 3: 11.3}
 
-    def test_getitem_exact(self):
-        self.assertEqual(self.offsets[0], 12.3)
+    def test_get(self):
+        self.assertEqual(self.offsets.get(0), 11.7)
 
-    def test_getitem_middle(self):
-        self.assertEqual(self.offsets[250], 12.3)
+    def test_get_3(self):
+        self.assertEqual(self.offsets.get(3), 11.3)
 
-    def test_getitem_exact_2nd(self):
-        self.assertEqual(self.offsets[560], 11.7)
-
-    def test_getitem_middle_2nd(self):
-        self.assertEqual(self.offsets[900], 11.7)
+    def test_get_missing(self):
+        self.assertEqual(self.offsets.get(7), 67.0)
 
     def test_setitem(self):
-        offsets = Offsets()
-        offsets[0] = 10.0
-        self.assertEqual(offsets[0], 10.0)
-        self.assertEqual(offsets[100], 10.0)
-        self.assertEqual(offsets[1000], 10.0)
-        self.assertEqual(offsets[10000], 10.0)
+        offsets = RotationOffsets()
+        offsets.set(0, 10.0)
+        self.assertEqual(offsets.get(0), 10.0)
 
     def test_length(self):
-        self.assertEqual(len(self.offsets), 1010)
+        self.assertEqual(len(self.offsets), 3)
