@@ -1,14 +1,11 @@
 from model.image.stack import ImageStack
 from service.image.rotation import V1RotationAnalyzer
-from model.image.offset import RotationOffsets
+from service.image.registration import V1RegistrationAnalyzer
+from model.image.offset import RegistrationOffsets
 from nd2reader import Nd2
 from skimage import io, transform
 import logging
 import time
-import numpy as np
-from scipy import ndimage
-from skimage.filters import gaussian_filter, rank, threshold_otsu, sobel_v
-from skimage.morphology import disk, remove_small_objects, skeletonize
 
 
 log = logging.getLogger()
@@ -25,16 +22,16 @@ def show(image):
     io.show()
     time.sleep(0.2)
 
-reg = V1RotationAnalyzer()
-offsets = RotationOffsets()
-reg.determine_offsets(stack, offsets, 'BF')
-for image in stack.select(z_levels=1, channels='BF'):
-    skew = offsets.get(image.field_of_view)
-    timage = transform.rotate(image, skew)
-    fname = "/var/nd2s/images/%s_%s_original.png" % (image.field_of_view, image.frame_number)
-    tfname = "/var/nd2s/images/%s_%s_rotated.png" % (image.field_of_view, image.frame_number)
+rot = V1RotationAnalyzer()
+reg = V1RegistrationAnalyzer()
+offsets = RegistrationOffsets()
+reg.determine_translation(stack, offsets, 'BF')
+for image in stack.select(z_levels=1, fields_of_view=3, channels='BF'):
+    translation = offsets.get(image.field_of_view, image.frame_number)
+    warp = transform.AffineTransform(translation=(-translation.x, -translation.y))
+    timage = transform.warp(image, warp)
+    tfname = "/var/nd2s/images/%s_%s.png" % (image.field_of_view, image.frame_number)
     log.debug(tfname)
     if image.frame_number == 1:
         break
     io.imsave(tfname, timage)
-    io.imsave(fname, image)
