@@ -6,7 +6,7 @@ class ImageStack(object):
     """
     def __init__(self):
         self._image_sets = {}
-        self._image_lookup = {}
+        self._image_lookup_table = {}
         self._groups = {}
         self._field_of_view = None
         self._z_level = None
@@ -27,7 +27,7 @@ class ImageStack(object):
         image_set_index = len(self._image_sets)
         # we need to know how many total images we already have, so when we index the new images in the new image set,
         # we can start from the next available index
-        image_count = len(self._image_lookup)
+        image_count = len(self._image_lookup_table)
         # We will keep track of groups of images. At each field of view, images with unique combinations of channel and
         # focus are taken together. Then we move on to another field of view, which is considered another group.
         # If we only have one field of view, a new group starts when an image has the same channel and focus as one in
@@ -35,7 +35,7 @@ class ImageStack(object):
         for n in range(len(image_set)):
             # for each image, we create a new global index number, and map that to the particular image set it came
             # from and its local index number
-            self._image_lookup[image_count + n] = (image_set_index, n)
+            self._image_lookup_table[image_count + n] = (image_set_index, n)
         # here we just store the image set so we can access the images from it
         self._image_sets[image_set_index] = image_set
 
@@ -45,7 +45,7 @@ class ImageStack(object):
 
     def __len__(self) -> int:
         """ The number of total images there are in all the image sets. """
-        return len(self._image_lookup)
+        return len(self._image_lookup_table)
 
     def __getitem__(self, index):
         if not isinstance(index, int):
@@ -55,7 +55,7 @@ class ImageStack(object):
         # We have several sets of images, each indexed from 0 to some arbitrary number. We need to figure out which
         # image set the given index maps to which file. Once we know the image set, we also need to know which image
         # we should use.
-        image_set_index, image_index = self._image_lookup[index]
+        image_set_index, image_index = self._image_lookup_table[index]
         return self._image_sets[image_set_index][image_index]
 
     def select(self, fields_of_view: int=None, z_levels: int=None, channels: str=None):
