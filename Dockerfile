@@ -6,6 +6,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         gfortran \
         gcc \
         git \
+        libgl1-mesa-dri \
+        libgl1-mesa-swx11 \
+        libosmesa6 \
         libfreetype6-dev \
         libpng12-dev \
         libjpeg-dev \
