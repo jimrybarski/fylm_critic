@@ -10,7 +10,7 @@ class MockImage(object):
 
 class ImageStackTests(unittest.TestCase):
     def test_add_correct_length(self):
-        """ Does adding image sets result in the correct length for the stack? """
+        # Does adding image sets result in the correct length for the stack?
         stack = ImageStack()
         image_set = {"1": 1, "2": 2}
         image_set2 = {"1": 1, "2": 2, "3": 3}
@@ -20,6 +20,7 @@ class ImageStackTests(unittest.TestCase):
         self.assertEqual(len(stack), 5)
 
     def test_add(self):
+        # Can we add more images and have them get the correct indexes?
         stack = ImageStack()
         image_set = {"1": 1, "2": 2}
         image_set2 = {"1": 1, "2": 2, "3": 3}
@@ -28,11 +29,7 @@ class ImageStackTests(unittest.TestCase):
         self.assertListEqual(sorted(list(stack._image_lookup.keys())), [0, 1, 2, 3, 4])
 
     def test_getitem(self):
-        """
-        We combine several sets of images, each of which starts its own index at zero.
-        We want to be able to combine them into one superset and have a single range of indices.
-
-        """
+        # Can we combine multiple image sets and index into them properly?
         stack = ImageStack()
         image_set = {0: "image0", 1: "image1"}
         image_set2 = {0: "image2", 1: "image3", 2: "image4"}
@@ -45,6 +42,7 @@ class ImageStackTests(unittest.TestCase):
         self.assertEqual(stack[4], "image4")
 
     def test_iter(self):
+        # Can we iterate over several different image sets and have it seem like there's just one?
         stack = ImageStack()
         image_set = {0: "image0", 1: "image1"}
         image_set2 = {0: "image2", 1: "image3", 2: "image4"}
