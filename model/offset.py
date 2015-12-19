@@ -1,8 +1,6 @@
-from collections import namedtuple, defaultdict
+from collections import defaultdict
+from model.coordinates import Point
 import statistics
-
-
-Point = namedtuple('Point', ['x', 'y'])
 
 
 class RegistrationOffsets(object):

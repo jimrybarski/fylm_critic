@@ -5,7 +5,7 @@ from scipy import ndimage
 from skimage.filters import gaussian_filter, threshold_otsu, sobel_v
 from skimage.morphology import remove_small_objects, skeletonize, binary_opening
 from skimage import transform
-from model.image.offset import RotationOffsets
+from model.offset import RotationOffsets
 import statistics
 
 

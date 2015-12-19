@@ -1,5 +1,6 @@
 import unittest
-from model.image.offset import RotationOffsets, RegistrationOffsets, Point
+from model.offset import RotationOffsets, RegistrationOffsets
+from model.coordinates import Point
 
 
 class RegistrationOffsetTests(unittest.TestCase):
