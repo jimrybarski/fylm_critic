@@ -48,6 +48,6 @@ class Artist(object):
 
         artist_width = artist_bottom_right.x - artist_top_left.x + 1
         artist_height = artist_bottom_right.y - artist_top_left.y + 1
-        bottom_right_x = min(artist_width, image_bottom_right.x - artist_bottom_right.x)
-        bottom_right_y = min(artist_height, image_bottom_right.y - artist_bottom_right.y)
+        bottom_right_x = min(artist_width, image_bottom_right.x - artist_bottom_right.x + 1)
+        bottom_right_y = min(artist_height, image_bottom_right.y - artist_bottom_right.y + 1)
         return top_left_x, top_left_y, bottom_right_x, bottom_right_y
