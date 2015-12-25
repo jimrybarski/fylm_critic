@@ -1,6 +1,6 @@
 from skimage.feature import register_translation
-from model.image.offset import RegistrationOffsets, Point
-from model.image.stack import ImageStack
+from model.offset import RegistrationOffsets, Point
+from model.stack import ImageStack
 import logging
 
 log = logging.getLogger(__name__)
