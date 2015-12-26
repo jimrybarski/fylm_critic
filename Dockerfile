@@ -54,10 +54,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libqt5core5a \
         wget \
     && pip3 install \
-           numpy \
-           scipy \
-           matplotlib \
-           h5py \
+        numpy \
+        scipy \
+        matplotlib \
+        h5py \
     && wget http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.5.1/PyQt-gpl-5.5.1.tar.gz \
     && wget http://sourceforge.net/projects/pyqt/files/sip/sip-4.17/sip-4.17.tar.gz \
     && tar -xf sip-4.17.tar.gz \
@@ -66,16 +66,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && cd PyQt-gpl-5.5.1 && yes yes | python3.5 configure.py && make && make install && cd .. && rm -rf PyQt-gpl-5.5.1.tar.gz PyQt-gpl-5.5.1 \
     && pip3 install --upgrade Cython \
     && pip3 install --upgrade scikit-image \
-    && pip3 install nd2reader==2.0.0 \
+    && pip3 install "nd2reader==2.0.0" \
     && apt-get remove -y \
-           wget \
-           build-essential \
-           gcc \
-           gfortran \
-           git \
-           pkg-config \
+        wget \
+        build-essential \
+        gcc \
+        gfortran \
+        git \
+        pkg-config \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
+
 
 RUN mkdir -p /root/.config/matplotlib/
 COPY matplotlibrc /root/.config/matplotlib/matplotlibrc
