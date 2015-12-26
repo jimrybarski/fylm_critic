@@ -1,7 +1,7 @@
 from abc import abstractmethod
+from model.color import Color
 from model.coordinates import Point
 from PIL import ImageDraw
-import numpy as np
 
 
 class Artist(object):
@@ -11,18 +11,18 @@ class Artist(object):
     thing.
 
     """
-    def __init__(self, coordinates: Point, color="#83F52C"):
+    def __init__(self, coordinates: Point, color: Color):
         """
         :param coordinates:  the location of the pixel of interest. This is not necessarily the top-left corner of
-        the artist!
+        the Artist!
 
         """
         assert coordinates.x > 0 and coordinates.y > 0
         self._coordinates = coordinates
-        self._color = color
+        self._color = color.hex
 
     @abstractmethod
-    def draw(self, image_draw: ImageDraw) -> np.ndarray:
+    def draw(self, image_draw: ImageDraw):
         """
         Put the Artist's output onto the ImageDraw object.
 
@@ -32,10 +32,10 @@ class Artist(object):
 
 class XCrossArtist(Artist):
     """
-    Draws an X.
+    Draws an X centered on the given coordinates.
 
     """
-    def __init__(self, coordinates: Point, diameter: int=6, linewidth: int=3, color: str="#83F52C"):
+    def __init__(self, coordinates: Point, color: Color=Color(131, 245, 44), diameter: int=6, linewidth: int=3):
         super().__init__(coordinates, color)
         self._diameter = diameter
         self._linewidth = linewidth

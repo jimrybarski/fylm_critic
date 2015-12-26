@@ -1,15 +1,15 @@
 from model.artist import Artist
 import numpy as np
 from PIL import Image, ImageDraw
-from model.color import Color
+from model import color
 
 
 class Canvas(object):
     def __init__(self, image: np.array):
-        self._background_image = Color.convert_to_rgb(image)
+        self._background_image = color.convert_to_rgb(image)
         self._artists = []
 
-    def add_overlay(self, image: np.array, display_color: Color, alpha: float=1.0):
+    def add_overlay(self, image: np.array, display_color: color.Color, alpha: float=1.0):
         """
         Put another image on top of the background greyscale one. Usually, this is for adding
         fluorescent data on top of a bright field image.
