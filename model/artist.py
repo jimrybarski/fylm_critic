@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from model.coordinates import Point
-from PIL import Image, ImageDraw
+from PIL import ImageDraw
 import numpy as np
 
 
@@ -22,23 +22,28 @@ class Artist(object):
         self._color = color
 
     @abstractmethod
-    def _draw(self, image: Image):
-        raise NotImplementedError
-
     def draw(self, image_draw: ImageDraw) -> np.ndarray:
-        self._draw(image_draw)
+        """
+        Put the Artist's output onto the ImageDraw object.
+
+        """
+        raise NotImplementedError
 
 
 class XCrossArtist(Artist):
-    def __init__(self, coordinates: Point, diameter=6, linewidth=3, color="#83F52C"):
+    """
+    Draws an X.
+
+    """
+    def __init__(self, coordinates: Point, diameter: int=6, linewidth: int=3, color: str="#83F52C"):
         super().__init__(coordinates, color)
         self._diameter = diameter
         self._linewidth = linewidth
         
-    def _draw(self, canvas: ImageDraw):
-        canvas.line((self._coordinates.x - self._diameter, self._coordinates.y - self._diameter,
-                     self._coordinates.x + self._diameter, self._coordinates.y + self._diameter),
-                    fill=self._color, width=self._linewidth)
-        canvas.line((self._coordinates.x + self._diameter, self._coordinates.y - self._diameter,
-                     self._coordinates.x - self._diameter, self._coordinates.y + self._diameter),
-                    fill=self._color, width=self._linewidth)
+    def draw(self, image_draw: ImageDraw):
+        image_draw.line((self._coordinates.x - self._diameter, self._coordinates.y - self._diameter,
+                         self._coordinates.x + self._diameter, self._coordinates.y + self._diameter),
+                        fill=self._color, width=self._linewidth)
+        image_draw.line((self._coordinates.x + self._diameter, self._coordinates.y - self._diameter,
+                         self._coordinates.x - self._diameter, self._coordinates.y + self._diameter),
+                        fill=self._color, width=self._linewidth)
