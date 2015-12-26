@@ -1,32 +1,22 @@
 from model.artist import Artist
 import numpy as np
 from PIL import Image, ImageDraw
-from skimage import color, img_as_float
+from model.color import Color
 
 
 class Canvas(object):
     def __init__(self, image: np.array):
-        self._background_image = self._convert_to_rgb(image)
+        self._background_image = Color.convert_to_rgb(image)
         self._artists = []
 
-    def _convert_to_rgb(self, image: np.array) -> np.ndarray:
-        """
-        Converts a raw, 16-bit greyscale image to an 8-bit RGB image.
-
-        """
-        assert len(image.shape) == 2, 'image must be greyscale'
-        return (255 * color.gray2rgb(img_as_float(image))).astype('uint8')
-
-    def add_overlay(self, image: np.array, display_color: np.array, alpha: float=1.0):
+    def add_overlay(self, image: np.array, display_color: Color, alpha: float=1.0):
         """
         Put another image on top of the background greyscale one. Usually, this is for adding
         fluorescent data on top of a bright field image.
 
         """
         assert len(image.shape) == 2, 'image must be greyscale'
-        assert display_color.shape == (3,), 'display_color must be an array with 3 values (for RGB)'
-        color_image = self._convert_to_rgb(image)
-        self._background_image += (color_image * display_color * alpha).astype('uint8')
+        self._background_image += (display_color * image * alpha).astype('uint8')
 
     def add_artist(self, artist: Artist):
         """
