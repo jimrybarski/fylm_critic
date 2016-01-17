@@ -1,25 +1,34 @@
 from skimage.feature import register_translation
+from skimage import transform
 from model.offset import RegistrationOffsets, Point
 from model.stack import ImageStack
 import logging
+import numpy as np
 
 log = logging.getLogger(__name__)
 
 
-class V1RegistrationAnalyzer(object):
-    def determine_translation(self, image_stack: ImageStack, offsets: RegistrationOffsets, brightfield_channel_name: str) -> RegistrationOffsets:
-        log.debug("Registering!")
-        # We may only be partially done determining offsets. We'll pick up where we left off (or start at the beginning)
-        assert len(image_stack) > 0
-        assert len(offsets) <= image_stack.frame_count
-        if len(offsets) < image_stack.frame_count:
-            self._calculate_offsets(image_stack, offsets, brightfield_channel_name)
-        return offsets
+class RegistrationCorrector(object):
+    def __init__(self, offsets: RegistrationOffsets):
+        self._offsets = offsets
 
-    def _calculate_offsets(self, image_stack: ImageStack, offsets: RegistrationOffsets, channel: str):
-        # We can't tell if the work is done, since we don't know how many of the images in image_stack are in the
-        # channel we want to use. We know the absolute minimum.
+    def align(self, image, field_of_view, frame_number) -> np.ndarray:
+        offset = self._offsets.get(field_of_view, frame_number)
+        corrective_transform = transform.AffineTransform(translation=(-offset.x, -offset.y))
+        return transform.warp(image, corrective_transform)
+
+
+class V1RegistrationAnalyzer(object):
+    def determine_translation(self, image_stack: ImageStack, brightfield_channel_name: str) -> RegistrationOffsets:
+        log.debug("Registering!")
+        assert len(image_stack) > 0
+        return self._calculate_offsets(image_stack, brightfield_channel_name)
+
+    def _calculate_offsets(self, image_stack: ImageStack, channel: str):
+        offsets = RegistrationOffsets()
+        # We use the very first image of each field of view to align things against
         first_images = self._get_first_out_of_focus_images(image_stack, channel)
+        # Now we go over each image for each field of view and align it
         for unregistered_image in image_stack.select(z_levels=0, channels=channel):
             x, y = self._calculate_translation(first_images[unregistered_image.field_of_view], unregistered_image)
             offsets.set(unregistered_image.field_of_view, unregistered_image.frame_number, Point(x=x, y=y))
@@ -27,19 +36,19 @@ class V1RegistrationAnalyzer(object):
                                                                         unregistered_image.frame_number,
                                                                         x,
                                                                         y))
+        return offsets
 
     def _get_first_out_of_focus_images(self, image_stack: ImageStack, channel: str) -> dict:
-        field_of_view_count = 8
         images = {}
         for n, image in enumerate(image_stack.select(z_levels=0, channels=channel)):
-            if n == field_of_view_count:
-                # There are always 8 fields of view
+            if n == image_stack.field_of_view_count:
+                # we've cycled through all the fields of view and are back to the beginning, so we can quit now
                 break
             images[image.field_of_view] = image
-        if len(images) < field_of_view_count:
-            raise ValueError("Could not find an image to align the image stack against. You probably chose the wrong "
-                             "channel to do alignments with.")
-        assert max(images) < field_of_view_count
+        if len(images) < image_stack.field_of_view_count:
+            raise ValueError("Could not find enough images to align the image stack against. You probably chose the"
+                             "wrong channel to do alignments with.")
+        assert max(images) < image_stack.field_of_view_count
         return images
 
     @staticmethod

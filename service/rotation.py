@@ -6,8 +6,9 @@ from skimage.filters import gaussian_filter, threshold_otsu, sobel_v
 from skimage.morphology import remove_small_objects, skeletonize, binary_opening
 from skimage import transform
 from model.offset import RotationOffsets
+from model.stack import ImageStack
 import statistics
-
+from nd2reader.model import Image
 
 FIFTEEN_DEGREES_IN_RADIANS = 0.262
 
@@ -19,34 +20,25 @@ class RotationCorrector(object):
     Takes images that are rotated in the XY-plane and corrects them.
 
     """
-    def __init__(self, offsets):
+    def __init__(self, offsets: RotationOffsets):
         self._offsets = offsets
 
-    def adjust(self, image):
-        return self._rotate(image, self._offsets.get(image.field_of_view))
-
-    @staticmethod
-    def _rotate(image: np.array, degrees: float) -> np.array:
-        return transform.rotate(image, degrees)
+    def rotate(self, image, field_of_view) -> np.ndarray:
+        return transform.rotate(image, self._offsets.get(field_of_view))
 
 
 class V1RotationAnalyzer(object):
-    FIELD_OF_VIEW_COUNT = 8
-
-    def determine_offsets(self, image_stack, offsets: RotationOffsets, brightfield_channel_name: str) -> RotationOffsets:
-        # We may only be partially done determining offsets. We'll pick up where we left off (or start at the beginning)
-        self._calculate_offsets(image_stack, offsets, brightfield_channel_name)
-
-    def _calculate_offsets(self, image_stack, offsets, brightfield_channel_name):
-        # we still have some work to do
+    def determine_offsets(self, image_stack: ImageStack, brightfield_channel_name: str) -> RotationOffsets:
+        offsets = RotationOffsets()
         for unrotated_image in image_stack.select(z_levels=1, channels=brightfield_channel_name):
             skew = self._calculate_skew(unrotated_image)
             offsets.set(unrotated_image.field_of_view, skew)
-            if len(offsets) == V1RotationAnalyzer.FIELD_OF_VIEW_COUNT:
+            if len(offsets) == image_stack.field_of_view_count:
                 break
+        return offsets
 
     @staticmethod
-    def _calculate_skew(image: np.array) -> float:
+    def _calculate_skew(image: Image) -> float:
         """
         Determines the rotational skew of an image of a Version 1 FYLM device (the one with 28 channels per field of
         view and a large central trench.

@@ -1,3 +1,7 @@
+from nd2reader.model import Image
+import numpy as np
+
+
 class ImageStack(object):
     """
     This is a model that combines multiple ND2s into one logical image set. Other file types may be used if they are in
@@ -8,9 +12,12 @@ class ImageStack(object):
         self._image_sets = {}
         self._image_lookup_table = {}
         self._groups = {}
-        self._field_of_view = None
-        self._z_level = None
-        self._channel = None
+        self._registration_corrector = None
+        self._rotation_corrector = None
+
+    def set_offsets(self, registration=None, rotation=None):
+        self._registration_corrector = registration
+        self._rotation_corrector = rotation
 
     def add(self, image_set):
         """
@@ -43,9 +50,23 @@ class ImageStack(object):
     def frame_count(self):
         return sum([len(image_set.frames) for image_set in self._image_sets.values()])
 
+    @property
+    def field_of_view_count(self):
+        return len(self._image_sets[0].fields_of_view)
+
     def __len__(self) -> int:
         """ The number of total images there are in all the image sets. """
         return len(self._image_lookup_table)
+
+    def _correct(self, image: Image) -> np.ndarray:
+        # the correctors return numpy arrays so we need to capture this information before any transformations are done
+        field_of_view = image.field_of_view
+        frame_number = image.frame_number
+        if self._registration_corrector is not None:
+            image = self._registration_corrector.align(image, field_of_view, frame_number)
+        if self._rotation_corrector is not None:
+            image = self._rotation_corrector.rotate(image, field_of_view)
+        return image
 
     def __getitem__(self, index):
         if not isinstance(index, int):
@@ -56,10 +77,10 @@ class ImageStack(object):
         # image set the given index maps to which file. Once we know the image set, we also need to know which image
         # we should use.
         image_set_index, image_index = self._image_lookup_table[index]
-        return self._image_sets[image_set_index][image_index]
+        return self._correct(self._image_sets[image_set_index][image_index])
 
     def select(self, fields_of_view: int=None, z_levels: int=None, channels: str=None):
         """ Returns an iterator over images that meet the given criteria. """
         for _, image_set in sorted(self._image_sets.items()):
             for image in image_set.select(fields_of_view=fields_of_view, z_levels=z_levels, channels=channels):
-                yield image
+                yield self._correct(image)
