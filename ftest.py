@@ -24,5 +24,5 @@ canvas.add_artist(artist2)
 canvas.add_artist(artist3)
 canvas.add_artist(artist4)
 
-io.imshow(canvas.combined_image)
+io.imshow(canvas.image)
 io.show()
