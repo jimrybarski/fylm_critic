@@ -1,6 +1,9 @@
-from collections import namedtuple
-
-Point = namedtuple('Point', ['x', 'y'])
+class Point(object):
+    def __init__(self, x, y):
+        assert isinstance(x, int)
+        assert isinstance(y, int)
+        self.x = x
+        self.y = y
 
 
 class BoundingBox(object):

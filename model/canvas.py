@@ -26,7 +26,7 @@ class Canvas(object):
         self._artists.append(artist)
 
     @property
-    def combined_image(self) -> np.array:
+    def image(self) -> np.array:
         """
         Puts all the images and artists together to create a single image.
 

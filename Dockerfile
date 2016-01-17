@@ -66,7 +66,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && cd PyQt-gpl-5.5.1 && yes yes | python3.5 configure.py && make && make install && cd .. && rm -rf PyQt-gpl-5.5.1.tar.gz PyQt-gpl-5.5.1 \
     && pip3 install --upgrade Cython \
     && pip3 install --upgrade scikit-image \
-    && pip3 install "nd2reader==2.0.0" \
+    && pip3 install "nd2reader==2.1.0" \
     && apt-get remove -y \
         wget \
         build-essential \
