@@ -17,8 +17,7 @@ class RegistrationOffsets(object):
     def get(self, field_of_view: int, frame_number: int) -> Point:
         assert frame_number >= 0
         assert field_of_view >= 0
-        x, y = self._offsets[field_of_view][frame_number]
-        return Point(x=x, y=y)
+        return self._offsets[field_of_view][frame_number]
 
     def set(self, field_of_view: int, frame_number: int, offset: Point):
         assert frame_number >= 0

@@ -1,9 +1,10 @@
 class Point(object):
     def __init__(self, x, y):
-        assert isinstance(x, int)
-        assert isinstance(y, int)
         self.x = x
         self.y = y
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
 
 
 class BoundingBox(object):

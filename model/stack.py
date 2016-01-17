@@ -8,9 +8,6 @@ class ImageStack(object):
         self._image_sets = {}
         self._image_lookup_table = {}
         self._groups = {}
-        self._field_of_view = None
-        self._z_level = None
-        self._channel = None
 
     def add(self, image_set):
         """
@@ -42,6 +39,10 @@ class ImageStack(object):
     @property
     def frame_count(self):
         return sum([len(image_set.frames) for image_set in self._image_sets.values()])
+
+    @property
+    def field_of_view_count(self):
+        return len(self._image_sets[0].fields_of_view)
 
     def __len__(self) -> int:
         """ The number of total images there are in all the image sets. """
