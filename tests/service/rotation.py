@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
-from service.image.rotation import RotationCorrector
-from model.image.offset import RotationOffsets
+from service.rotation import RotationCorrector
+from model.offset import RotationOffsets
 
 
 class MockImage(np.ndarray):

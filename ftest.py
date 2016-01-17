@@ -1,37 +1,28 @@
-from model.stack import ImageStack
-from service.rotation import V1RotationAnalyzer
-from service.registration import V1RegistrationAnalyzer
-from model.offset import RegistrationOffsets
+from model.artist import XCrossArtist
+from model.canvas import Canvas
+from model.color import Color
+from model.coordinates import Point
 from nd2reader import Nd2
-from skimage import io, transform
-import logging
-import time
+import numpy as np
+from skimage import io
 
+nd2 = Nd2("/var/nd2s/FYLM-141111-001.nd2")
+background_image = nd2[2]
+gfp_image = nd2[3]
+green = Color(131, 245, 44)
+red = Color(255, 0, 0)
 
-log = logging.getLogger()
-log.addHandler(logging.StreamHandler())
-log.setLevel(logging.DEBUG)
+artist = XCrossArtist(Point(100, 100), color=red)
+artist2 = XCrossArtist(Point(500, 100), color=red)
+artist3 = XCrossArtist(Point(500, 500))
+artist4 = XCrossArtist(Point(300, 600))
 
+canvas = Canvas(background_image)
+canvas.add_overlay(gfp_image, green)
+canvas.add_artist(artist)
+canvas.add_artist(artist2)
+canvas.add_artist(artist3)
+canvas.add_artist(artist4)
 
-stack = ImageStack()
-stack.add(Nd2("/var/nd2s/FYLM-141111-001.nd2"))
-
-
-def show(image):
-    io.imshow(image)
-    io.show()
-    time.sleep(0.2)
-
-rot = V1RotationAnalyzer()
-reg = V1RegistrationAnalyzer()
-offsets = RegistrationOffsets()
-reg.determine_translation(stack, offsets, 'BF')
-for image in stack.select(z_levels=1, fields_of_view=3, channels='BF'):
-    translation = offsets.get(image.field_of_view, image.frame_number)
-    warp = transform.AffineTransform(translation=(-translation.x, -translation.y))
-    timage = transform.warp(image, warp)
-    tfname = "/var/nd2s/images/%s_%s.png" % (image.field_of_view, image.frame_number)
-    log.debug(tfname)
-    if image.frame_number == 1:
-        break
-    io.imsave(tfname, timage)
+io.imshow(canvas.combined_image)
+io.show()

@@ -1,5 +1,5 @@
 import unittest
-from model.image.stack import ImageStack
+from model.stack import ImageStack
 
 
 class MockImage(object):
@@ -26,7 +26,7 @@ class ImageStackTests(unittest.TestCase):
         image_set2 = {"1": 1, "2": 2, "3": 3}
         stack.add(image_set)
         stack.add(image_set2)
-        self.assertListEqual(sorted(list(stack._image_lookup.keys())), [0, 1, 2, 3, 4])
+        self.assertListEqual(sorted(list(stack._image_lookup_table.keys())), [0, 1, 2, 3, 4])
 
     def test_getitem(self):
         # Can we combine multiple image sets and index into them properly?
