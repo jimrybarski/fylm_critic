@@ -1,9 +1,21 @@
 from skimage.feature import register_translation
+from skimage import transform
 from model.offset import RegistrationOffsets, Point
 from model.stack import ImageStack
 import logging
+import numpy as np
 
 log = logging.getLogger(__name__)
+
+
+class RegistrationCorrector(object):
+    def __init__(self, offsets: RegistrationOffsets):
+        self._offsets = offsets
+
+    def align(self, image, field_of_view, frame_number) -> np.ndarray:
+        offset = self._offsets.get(field_of_view, frame_number)
+        corrective_transform = transform.AffineTransform(translation=(-offset.x, -offset.y))
+        return transform.warp(image, corrective_transform)
 
 
 class V1RegistrationAnalyzer(object):
