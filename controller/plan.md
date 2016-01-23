@@ -5,9 +5,8 @@ exceptions.
 
   - init: looks for existing DB files and image files, figure out state of processing
   - preprocess: registration and rotation correction
-  - location: define the locations of channels, and figure out if they have cells in them
-  - track: define the sizes and positions of cells
-  - kymograph: make kymographs from old pole cells
-  - movie: makes movies
-  - analyze: extracts information from defined cells (fluorescence, puncta, etc.)
+  - analyze: define the locations of channels, and figure out if they have cells in them
+             define the sizes and positions of cells
+             extracts information from defined cells (fluorescence, puncta, etc.)
+             make kymographs from old pole cells
   - train: select data for supervised learning processes
