@@ -21,7 +21,7 @@ class RotationTests(unittest.TestCase):
         image = MockImage(image)
         offsets = RotationOffsets()
         offsets.set(0, 90.0)
-        rotated = RotationCorrector(offsets).adjust(image).astype(np.bool)
+        rotated = RotationCorrector(offsets).rotate(image, 0).astype(np.bool)
         expected = np.zeros((3, 3), dtype=np.bool)
         expected[1][0] = 1
         # test if the arrays are equal
