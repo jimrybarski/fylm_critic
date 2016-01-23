@@ -1,5 +1,4 @@
 from nd2reader.model import Image
-import numpy as np
 
 
 class ImageStack(object):
@@ -58,15 +57,27 @@ class ImageStack(object):
         """ The number of total images there are in all the image sets. """
         return len(self._image_lookup_table)
 
-    def _correct(self, image: Image) -> np.ndarray:
+    def _correct(self, image: Image) -> Image:
+        """ Translates and rotates an image, if necessary. """
+        if self._registration_corrector is None and self._rotation_corrector is None:
+            return image
         # the correctors return numpy arrays so we need to capture this information before any transformations are done
         field_of_view = image.field_of_view
         frame_number = image.frame_number
+        timestamp = image.timestamp
+        index = image.index
+        channel = image.channel
+        z_level = image.z_level
+
+        # make the corrections
         if self._registration_corrector is not None:
             image = self._registration_corrector.align(image, field_of_view, frame_number)
         if self._rotation_corrector is not None:
             image = self._rotation_corrector.rotate(image, field_of_view)
-        return image
+        corrected_image = Image(image)
+        # add the metadata back
+        corrected_image.add_params(index, timestamp, frame_number, field_of_view, channel, z_level)
+        return corrected_image
 
     def __getitem__(self, index):
         if not isinstance(index, int):
