@@ -58,6 +58,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         scipy \
         matplotlib \
         h5py \
+        pandas \
     && wget http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.5.1/PyQt-gpl-5.5.1.tar.gz \
     && wget http://sourceforge.net/projects/pyqt/files/sip/sip-4.17/sip-4.17.tar.gz \
     && tar -xf sip-4.17.tar.gz \

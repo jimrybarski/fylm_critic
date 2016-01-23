@@ -29,3 +29,4 @@ log.debug("loaded images")
 rot_offsets = rot.determine_offsets(stack, '')
 log.debug("Finish rotation!!!!")
 reg_offsets = reg.determine_translation(stack, '')
+
