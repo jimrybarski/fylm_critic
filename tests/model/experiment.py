@@ -24,7 +24,7 @@ class ExperimentTests(unittest.TestCase):
         expected = ['/tmp/FYLM-141111-001.nd2',
                     '/tmp/FYLM-141111-002.nd2',
                     '/tmp/FYLM-141111-003.nd2']
-        actual = list(self.experiment.image_files)
+        actual = list(self.experiment.image_filenames)
         self.assertListEqual(expected, actual)
 
     def test_invalid_images(self):
@@ -36,7 +36,7 @@ class ExperimentTests(unittest.TestCase):
         expected = ['/tmp/FYLM-141111-001.nd2',
                     '/tmp/FYLM-141111-002.nd2',
                     '/tmp/FYLM-141111-003.nd2']
-        actual = list(self.experiment.image_files)
+        actual = list(self.experiment.image_filenames)
         self.assertListEqual(expected, actual)
 
     def test_must_add_image(self):

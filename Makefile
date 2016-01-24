@@ -9,8 +9,8 @@ build:
 test:	
 	docker run --rm -v $(CURDIR):/opt/ -it jimrybarski/fylmcritic python3.5 /opt/tests.py
 
-run:	
-	xhost local:root > /dev/null; docker run --rm -v $(CURDIR):/opt/ -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$(DISPLAY) -it jimrybarski/fylmcritic python3.5 /opt/bug.py --verbose-helpful
+ftest:	
+	xhost local:root > /dev/null; docker run --rm -v $(CURDIR):/opt/ -v /tmp/.X11-unix:/tmp/.X11-unix -v /var/fylmtest:/var/experiment -e DISPLAY=unix$(DISPLAY) -it jimrybarski/fylmcritic python3.5 /opt/ftest.py
 
 shell:	
 	xhost local:root > /dev/null; docker run --rm -v $(CURDIR):/opt/ -v /tmp/.X11-unix:/tmp/.X11-unix -v /home/jim/nd2s:/var/nd2s -e DISPLAY=unix$(DISPLAY) -it jimrybarski/fylmcritic bash

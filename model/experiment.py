@@ -44,7 +44,7 @@ class ExperimentFiles(object):
                                                   extension=extension)
 
     @property
-    def image_files(self):
+    def image_filenames(self):
         yield from sorted(self._images)
 
     def add_image_file(self, filename: str):
