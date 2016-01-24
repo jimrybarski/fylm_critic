@@ -80,7 +80,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 
-RUN mkdir -p /root/.config/matplotlib/
+RUN mkdir -p /root/.config/matplotlib
+RUN mkdir -p /root/.cache/matplotlib
 COPY matplotlibrc /root/.config/matplotlib/matplotlibrc
+COPY fontList.py3k.cache /root/.cache/matplotlib/fontList.py3k.cache
+COPY tex.cache /root/.cache/matplotlib/tex.cache
 ONBUILD COPY . /opt/
 WORKDIR /opt
