@@ -1,4 +1,6 @@
 from model import version
+from model.device import Device
+from service import registration, rotation
 import re
 import logging
 
@@ -7,11 +9,22 @@ log = logging.getLogger(__name__)
 
 class ExperimentFiles(object):
     """ Models all the files related to a particular experiment. """
-    def __init__(self, path: str):
+    def __init__(self, device: int, path: str):
+        self._device = device
         self._path = path.rstrip('/')
         self._date = None
-        self._images = set()
+        self._image_filenames = set()
         self._version = None
+
+    @property
+    def rotation_analyzer(self):
+        analyzers = {Device.ORIGINAL_FYLM: rotation.V1RotationAnalyzer}
+        return analyzers[self._device]()
+
+    @property
+    def registration_analyzer(self):
+        analyzers = {Device.ORIGINAL_FYLM: registration.V1RegistrationAnalyzer}
+        return analyzers[self._device]()
 
     @property
     def date(self) -> str:
@@ -45,14 +58,14 @@ class ExperimentFiles(object):
 
     @property
     def image_filenames(self):
-        yield from sorted(self._images)
+        yield from sorted(self._image_filenames)
 
     def add_image_file(self, filename: str):
         date = self._extract_date(filename)
         if self._date is None:
             self._date = date
         if date is not None and date == self._date:
-            self._images.add("{path}/{filename}".format(path=self._path, filename=filename))
+            self._image_filenames.add("{path}/{filename}".format(path=self._path, filename=filename))
         else:
             log.warn("Found an invalid or improperly named ND2: {filename}".format(filename=filename))
             log.warn("Not adding {filename} to the experiment.".format(filename=filename))

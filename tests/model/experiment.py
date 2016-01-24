@@ -1,11 +1,12 @@
 from model.experiment import ExperimentFiles
+from model.device import Device
 from model import version
 import unittest
 
 
 class ExperimentTests(unittest.TestCase):
     def setUp(self):
-        self.experiment = ExperimentFiles("/tmp")
+        self.experiment = ExperimentFiles(Device.ORIGINAL_FYLM, "/tmp")
 
     def test_file_paths(self):
         self.experiment.add_image_file("FYLM-141111-001.nd2")
