@@ -1,6 +1,7 @@
 from collections import defaultdict
 from model.coordinates import Point
 import statistics
+from pandas import DataFrame
 
 
 class RegistrationOffsets(object):
@@ -12,8 +13,14 @@ class RegistrationOffsets(object):
         self._offsets = defaultdict(dict)
 
     def __len__(self):
-        return sum([len(fov) for fov in self._offsets.values()])
-    
+        return len(self._offsets)
+
+    @property
+    def df(self):
+        data = [[field_of_view, frame_number, point.x, point.y] for field_of_view, data in self._offsets.items()
+                for frame_number, point in data.items()]
+        return DataFrame(data, columns=['field_of_view', 'frame_number', 'x', 'y'])
+
     def get(self, field_of_view: int, frame_number: int) -> Point:
         assert frame_number >= 0
         assert field_of_view >= 0
@@ -36,6 +43,11 @@ class RotationOffsets(object):
 
     def __len__(self):
         return len(self._offsets)
+
+    @property
+    def df(self):
+        data = [[field_of_view, offset] for field_of_view, offset in self._offsets.items()]
+        return DataFrame(data, columns=['field_of_view', 'offset'])
 
     def get(self, field_of_view: int):
         assert field_of_view >= 0
