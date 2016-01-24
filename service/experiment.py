@@ -6,13 +6,12 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def load_experiment(path: str):
+def load_experiment(device: int, path: str):
     # First look for any images in the directory
-    experiment = ExperimentFiles(path)
+    experiment = ExperimentFiles(device, path)
     for file in os.listdir(path):
         if file.endswith('.nd2'):
             experiment.add_image_file(file)
-
     # Now try to read the metadata. Currently this only contains the version number used to process the data.
     try:
         with open(experiment.metadata_file) as f:

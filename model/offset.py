@@ -13,7 +13,7 @@ class RegistrationOffsets(object):
         self._offsets = defaultdict(dict)
 
     def __len__(self):
-        return len(self._offsets)
+        return sum([len(fov) for fov in self._offsets.values()])
 
     @property
     def df(self):
