@@ -8,6 +8,7 @@ log = logging.getLogger(__name__)
 
 def run(experiment: ExperimentFiles):
     stack = tools.load_stack(experiment)
+
     log.info("Starting rotation correction.")
     rotation_offsets = experiment.rotation_analyzer.determine_offsets(stack, '')
     log.info("Rotation analysis complete.")
