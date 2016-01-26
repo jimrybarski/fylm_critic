@@ -14,4 +14,3 @@ log.setLevel(logging.DEBUG)
 
 experiment = load_experiment(Device.ORIGINAL_FYLM, '/var/experiment')
 alignment.run(experiment)
-

@@ -10,6 +10,7 @@ log = logging.getLogger(__name__)
 class ExperimentFiles(object):
     """ Models all the files related to a particular experiment. """
     def __init__(self, device: int, path: str):
+        self._brightfield_channel_name = None
         self._device = device
         self._path = path.rstrip('/')
         self._date = None
@@ -67,11 +68,11 @@ class ExperimentFiles(object):
         if date is not None and date == self._date:
             self._image_filenames.add("{path}/{filename}".format(path=self._path, filename=filename))
         else:
-            log.warn("Found an invalid or improperly named ND2: {filename}".format(filename=filename))
-            log.warn("Not adding {filename} to the experiment.".format(filename=filename))
+            log.warn("Found an invalid or improperly named ND2: {filename} -- Not adding {filename} to the experiment.".format(filename=filename))
 
     def set_metadata(self, metadata: dict):
         self._version = metadata.get('version', version)
+        self._brightfield_channel_name = metadata.get('brightfield_channel_name', '')
 
     def _extract_date(self, filename: str) -> str:
         match = re.match(r'''^FYLM-(\d{6})-\d{3}.nd2$''', filename)

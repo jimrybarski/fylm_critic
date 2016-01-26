@@ -1,17 +1,13 @@
 import logging
 from model.experiment import ExperimentFiles
-from model.stack import ImageStack
-from nd2reader import Nd2
 from service.database import Database
+from service import tools
 
 log = logging.getLogger(__name__)
 
 
 def run(experiment: ExperimentFiles):
-    stack = ImageStack()
-    for image in experiment.image_filenames:
-        stack.add(Nd2(image))
-
+    stack = tools.load_stack(experiment)
     log.info("Starting rotation correction.")
     rotation_offsets = experiment.rotation_analyzer.determine_offsets(stack, '')
     log.info("Rotation analysis complete.")

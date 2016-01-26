@@ -14,9 +14,9 @@ class ImageStack(object):
         self._registration_corrector = None
         self._rotation_corrector = None
 
-    def set_offsets(self, registration=None, rotation=None):
-        self._registration_corrector = registration
-        self._rotation_corrector = rotation
+    def set_correctors(self, registration_corrector=None, rotation_corrector=None):
+        self._registration_corrector = registration_corrector
+        self._rotation_corrector = rotation_corrector
 
     def add(self, image_set):
         """
