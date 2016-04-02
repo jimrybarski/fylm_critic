@@ -13,10 +13,18 @@ class CatchTube(BoundingBox):
                  rotate=False):
         super().__init__(top_left, bottom_right)
         assert not all((flip_lr, rotate))
-        self.id_number = id_number
+        self._id = id_number
         self._field_of_view = field_of_view
         self._flip_lr = flip_lr
         self._rotate = rotate
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def field_of_view(self):
+        return self._field_of_view
 
     def extract(self, image: Image) -> np.ndarray:
         """

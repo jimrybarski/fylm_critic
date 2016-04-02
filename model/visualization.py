@@ -1,10 +1,11 @@
-from model.coordinates import BoundingBox
+from model.tube import CatchTube
 from model.image import Image
+from typing import Union
 
 
 class Movie(object):
-    def __init__(self, bounding_box: BoundingBox):
-        self._bounding_box = bounding_box
+    def __init__(self, region_of_interest: Union[CatchTube]):
+        self._roi = region_of_interest
         self._alphas = {}
         self._images = {}
         self._fill_missing_fluorescent_frames = False
@@ -32,15 +33,31 @@ class Movie(object):
         return self
 
     def offer_image(self, image: Image):
-        if image.channel not in self._images:
+        """
+        We need to see if this image belongs in the movie (e.g., it's a channel we're interested in, it's the right
+        field of view, etc).
+
+        """
+        if image.channel not in self._images or image.field_of_view != self._roi.field_of_view:
             # We don't want this image
             return
-        if self._images[image.channel] is not None:
+        # We never evict fluorescent images if we're filling in missing frames, so we can only throw an error for
+        # unexpected fluorescent images under very strict conditions. Still, it's unlikely that a bug will sneak through
+        # here without affecting the bright field images, and also and go unnoticed when we actually view the movies
+        invalid_fluorescent = image.channel != 'BF' and not self._fill_missing_fluorescent_frames and self._images[image.channel] is not None
+        invalid_bf = image.channel == 'BF' and self._images[image.channel] is not None
+        if invalid_fluorescent or invalid_bf:
             msg = 'A movie had not yet used an image from channel "%s" and was offered another image of that channel'
             raise RuntimeError(msg % image.channel)
-        self._images[image.channel] = self._bounding_box.extract(image)
+        self._images[image.channel] = self._roi.extract(image)
 
     def emit_frame(self):
-        if not all(self._images.values()):
+        if not all([i is not None for i in self._images.values()]):
             return None
         # combine the images
+        combined_image = "woo"
+        # delete images we no longer need
+        for key in self._images:
+            if key == 'BF' or not self._fill_missing_fluorescent_frames:
+                self._images[key] = None
+        return combined_image

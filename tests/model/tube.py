@@ -51,3 +51,21 @@ class TubeTests(unittest.TestCase):
                              [0, 2, 2, 9, 0]])
         self.assertTrue(np.array_equal(extracted_image, expected))
         self.assertEqual(extracted_image.shape, expected.shape)
+
+    def test_rotate(self):
+        raw_image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                              [0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0],
+                              [0, 0, 0, 3, 4, 2, 0, 0, 0, 0, 0, 0],
+                              [0, 0, 0, 3, 4, 2, 0, 0, 0, 0, 0, 0],
+                              [0, 0, 0, 3, 4, 2, 0, 0, 0, 0, 0, 0],
+                              [0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0],
+                              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+        image = Image(raw_image, 0, 0.0, 3, 'BF')
+        tube = CatchTube(0, 3, Point(3, 1), Point(5, 5), rotate=90)
+        extracted_image = tube.extract(image)
+        expected = np.array([[0, 3, 3, 3, 0],
+                             [2, 4, 4, 4, 9],
+                             [0, 2, 2, 2, 0]])
+        self.assertTrue(np.array_equal(extracted_image, expected))
+        self.assertEqual(extracted_image.shape, expected.shape)
