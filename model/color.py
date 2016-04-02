@@ -7,8 +7,12 @@ def convert_to_rgb(image: np.array) -> np.array:
         Converts a raw, 16-bit greyscale image to an 8-bit RGB image.
 
         """
+        if len(image.shape) == 3:
+            # image is already RGB
+            return image
         assert len(image.shape) == 2, 'image must be greyscale'
-        return (255 * color.gray2rgb(img_as_float(image))).astype('uint8')
+        color_image = color.gray2rgb(img_as_float(image))
+        return (255 * color_image).astype('uint8')
 
 
 class Color(object):

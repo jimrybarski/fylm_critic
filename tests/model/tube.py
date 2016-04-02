@@ -36,7 +36,7 @@ class TubeTests(unittest.TestCase):
 
     def test_extract_fliplr(self):
         raw_image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                              [0, 0, 0, 9, 2, 2, 0, 0, 0, 0, 0, 0],
+                              [0, 0, 0, 7, 2, 2, 0, 0, 0, 0, 0, 0],
                               [0, 0, 9, 4, 4, 4, 2, 0, 0, 0, 0, 0],
                               [0, 0, 0, 9, 2, 2, 0, 0, 0, 0, 0, 0],
                               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -46,7 +46,7 @@ class TubeTests(unittest.TestCase):
         image = Image(raw_image, 0, 0.0, 3, 'BF')
         tube = CatchTube(0, 3, Point(2, 1), Point(6, 3), flip_lr=True)
         extracted_image = tube.extract(image)
-        expected = np.array([[0, 2, 2, 9, 0],
+        expected = np.array([[0, 2, 2, 7, 0],
                              [2, 4, 4, 4, 9],
                              [0, 2, 2, 9, 0]])
         self.assertTrue(np.array_equal(extracted_image, expected))
