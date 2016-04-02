@@ -4,6 +4,9 @@ from PIL import Image, ImageDraw
 from model import color
 
 
+# I DUNNO ABOUT THIS
+
+
 class Canvas(object):
     def __init__(self, image: np.array):
         self._background_image = color.convert_to_rgb(image)
@@ -16,7 +19,7 @@ class Canvas(object):
 
         """
         assert len(image.shape) == 2, 'image must be greyscale'
-        self._background_image += (display_color * image * alpha).astype('uint8')
+        self._background_image += (display_color.convert(image) * alpha).astype('uint8')
 
     def add_artist(self, artist: Artist):
         """
@@ -31,7 +34,7 @@ class Canvas(object):
         Puts all the images and artists together to create a single image.
 
         """
-        pil_image = Image.fromarray(self._background_image, "RGB")
+        pil_image = Image.fromarray(self._background_image, 'RGB')
         image_draw = ImageDraw.Draw(pil_image)
         for artist in self._artists:
             artist.draw(image_draw)

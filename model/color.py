@@ -21,27 +21,17 @@ class Color(object):
             self._red = red
             self._blue = blue
             self._green = green
-            self._array = None
+            self._array = np.array([self._red, self._green, self._blue]) / 255
         else:
             raise ValueError("Color values are 8-bit and must be between 0 and 256")
 
-    @property
-    def array(self) -> np.array:
-        """
-        Create a Numpy array needed by __mul__()
-
-        """
-        if self._array is None:
-            self._array = np.array([self._red, self._green, self._blue]) / 255
-        return self._array
-
-    def __mul__(self, other: np.array) -> np.array:
+    def convert(self, image: np.array) -> np.array:
         """
         Used to convert images from greyscale to monochromatic.
 
         >>> greyscale_image = np.array([[12000, 4200, 1800], [9000, 1200, 4400]], dtype='uint8')
         >>> color = Color(255, 0, 3)
-        >>> color_image = color * greyscale_image
+        >>> color_image = color.convert(greyscale_image)
         >>> color_image.astype('uint8')
         array([[[224,   0,   2],
                 [104,   0,   1],
@@ -52,16 +42,9 @@ class Color(object):
                 [ 48,   0,   0]]], dtype=uint8)
 
         """
-        if len(other.shape) == 2:
-            other = convert_to_rgb(other)
-        return other * self.array
-
-    def __rmul__(self, other):
-        """
-        We implement this just to provide a helpful error message.
-
-        """
-        raise ArithmeticError("Color must always be the left operand in multiplication")
+        if len(image.shape) == 2:
+            image = convert_to_rgb(image)
+        return (image * self._array).astype(np.uint8)
 
     @property
     def hex(self) -> str:
