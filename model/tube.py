@@ -33,6 +33,7 @@ class CatchTube(BoundingBox):
         for comparison in figures.
 
         """
+        # TODO: This is in the wrong place
         assert image.field_of_view == self._field_of_view
         raw_data = image[self.top_left.y:self.bottom_right.y + 1,
                          self.top_left.x:self.bottom_right.x + 1]

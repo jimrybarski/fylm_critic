@@ -1,5 +1,5 @@
 import unittest
-from model.visualization import Movie, FigureBuilder
+from model.visualization import Movie, VisualizationBuilder
 from model.coordinates import Point
 from model.tube import CatchTube
 from model.image import Image
@@ -27,7 +27,7 @@ class FigureBuilderTests(unittest.TestCase):
     def test_offer(self):
         tube = CatchTube(0, 3, Point(0, 0), Point(20, 20))
         movie = Movie(tube).add_channel('BF')
-        fb = FigureBuilder(movie)
+        fb = VisualizationBuilder(movie)
         image = Image(np.array([[1, 0], [0, 1]]), 0, 0.0, 3, 'BF')
         self.assertIsNone(fb._images['BF'])
         fb.offer_image(image)
@@ -36,13 +36,13 @@ class FigureBuilderTests(unittest.TestCase):
     def test_emit_not_ready(self):
         tube = CatchTube(0, 3, Point(0, 0), Point(20, 20))
         movie = Movie(tube).add_channel('BF')
-        fb = FigureBuilder(movie)
+        fb = VisualizationBuilder(movie)
         self.assertIsNone(fb.build())
 
     def test_emit_not_ready_fl_channels(self):
         tube = CatchTube(0, 3, Point(0, 0), Point(20, 20))
         movie = Movie(tube).add_channel('BF').add_channel('GFP')
-        fb = FigureBuilder(movie)
+        fb = VisualizationBuilder(movie)
         image = Image(np.array([[1, 0], [0, 1]]), 0, 0.0, 3, 'BF')
         fb.offer_image(image)
         self.assertIsNone(fb.build())
@@ -50,7 +50,7 @@ class FigureBuilderTests(unittest.TestCase):
     def test_emit_two_channels(self):
         tube = CatchTube(0, 3, Point(0, 0), Point(20, 20))
         movie = Movie(tube).add_channel('BF').add_channel('GFP')
-        fb = FigureBuilder(movie)
+        fb = VisualizationBuilder(movie)
         bf_image = Image(np.array([[1, 0], [0, 1]]), 0, 0.0, 3, 'BF')
         gfp_image = Image(np.array([[1, 0], [0, 1]]), 0, 0.0, 3, 'GFP')
         fb.offer_image(bf_image)
@@ -60,7 +60,7 @@ class FigureBuilderTests(unittest.TestCase):
     def test_fill_missing_fl_channels(self):
         tube = CatchTube(0, 3, Point(0, 0), Point(20, 20))
         movie = Movie(tube).add_channel('BF').add_channel('GFP').fill_missing_fluorescent_frames()
-        fb = FigureBuilder(movie)
+        fb = VisualizationBuilder(movie)
         bf_image = Image(np.array([[1, 0], [0, 1]]), 0, 0.0, 3, 'BF')
         bf_image2 = Image(np.array([[1, 2], [9, 4]]), 0, 0.0, 3, 'BF')
         gfp_image = Image(np.array([[2, 6], [3, 3]]), 0, 0.0, 3, 'GFP')

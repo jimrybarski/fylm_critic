@@ -8,6 +8,7 @@ class BaseVisualization(object):
     def __init__(self, region_of_interest: Union[CatchTube]):
         self._roi = region_of_interest
         self._channels = {}
+        self._z_level = 1
 
     def add_channel(self, name: str, color: Color=Color(255, 255, 255), alpha: float=1.0):
         assert 0 <= alpha <= 1.0
@@ -27,9 +28,8 @@ class BaseVisualization(object):
         return self._roi.field_of_view
 
     @property
-    def should_fill_missing_fluorescent_frames(self):
-        # we will only ever need this in Movies
-        return False
+    def z_level(self):
+        return self._z_level
 
 
 class Figure(BaseVisualization):
@@ -84,7 +84,7 @@ class Movie(BaseVisualization):
         return self._missing_fl_fill
 
 
-class FigureBuilder(object):
+class VisualizationBuilder(object):
     """
     Combines image data with annotations and markup to produce frames for movies and images for figures.
     
