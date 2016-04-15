@@ -46,5 +46,8 @@ except:
     fylm_critic crashed! Please copy and paste the traceback and
     create a Github issue at https://github.com/jimrybarski/fylm_critic/issues
 
+    Protip: put tracebacks and code inbetween triple backticks (```) to format
+    them like code.
+
     ==========================================================================
     """)
