@@ -11,7 +11,7 @@ class ImageFeatureDetector(object):
 
 class SVM(ImageFeatureDetector):
     """
-    Finds features in an image by convoluting a support vector machine kernel.
+    Finds features in an image by convolving a support vector machine kernel over it.
 
     """
     pass

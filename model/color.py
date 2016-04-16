@@ -4,7 +4,12 @@ from skimage import color, img_as_float
 
 def convert_to_rgb(image: np.array) -> np.array:
         """
-        Converts a raw, 16-bit greyscale image to an 8-bit RGB image.
+        Converts an array to an 8-bit RGB image. This method is lossy and should only be used for
+        visualizations.
+
+        Parameters
+        ----------
+        image: 16-bit greyscale image
 
         """
         if len(image.shape) == 3:

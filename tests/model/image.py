@@ -6,8 +6,8 @@ import unittest
 class TestImage(unittest.TestCase):
     def setUp(self):
         self.image = Image(np.random.randint(0, 65536, (512, 512)).astype(np.uint16),
-                           13, 23562136136.311241, 8, 'GFP')
-        self.zeros = Image(np.zeros((512, 512)).astype(np.uint16), 13, 23562136136.311241, 8, 'GFP')
+                           13, 23562136136.311241, 8, 'GFP', 0)
+        self.zeros = Image(np.zeros((512, 512)).astype(np.uint16), 13, 23562136136.311241, 8, 'GFP', 0)
 
     def test_attributes(self):
         self.assertEqual(self.image.index, 13)
