@@ -104,3 +104,4 @@ class ROIFrameIterator(object):
         self._hdf5 = hdf5
 
     def __iter__(self):
+        pass
