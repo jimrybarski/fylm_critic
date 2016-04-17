@@ -4,7 +4,7 @@ from typing import Union
 
 class RegionOfInterest(object):
     def __init__(self, id_number: int, field_of_view: int, top_left: Point, bottom_right: Point,
-                 flip_lr: bool=False, rotate: Union[False, str]=False):
+                 flip_lr: bool=False, rotate: Union[bool, str]=False):
         assert top_left.x < bottom_right.x
         assert top_left.y < bottom_right.y
         assert not all((flip_lr, rotate))
@@ -38,5 +38,5 @@ class RegionOfInterest(object):
         return self._flip_lr
 
     @property
-    def rotate(self) -> Union[False, str]:
+    def rotate(self) -> Union[bool, str]:
         return self._rotate

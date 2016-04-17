@@ -86,6 +86,21 @@ class Frame(object):
         return self._images.get(channel).get(z_offset)
 
 
+
+class ImageTransformer(object):
+    def __init__(self, roi):
+        self._action = lambda image: image
+        if roi.flip_lr:
+            self._action = np.fliplr
+        elif roi.rotate == 'clockwise':
+            self._action = lambda image: np.flipud(image).T
+        elif roi.rotate == 'counterclockwise':
+            self._action = lambda image: np.flipud(image.T)
+
+    def __call__(self, image):
+        return self._action(image)
+
+
 class ImageStack(object):
     """
     Provides access to raw image data in an HDF5 file.
@@ -109,18 +124,11 @@ class ROIStack(object):
     Provides access to the image stack for a single region of interest, and automatically applies transformations.
 
     """
-    def __init__(self, roi: RegionOfInterest, image_stack: ImageStack):
+    def __init__(self, roi: RegionOfInterest, image_stack: ImageStack, transformer: ImageTransformer):
         self._roi = roi
         self._image_stack = image_stack
-        self._transform = lambda image: image
-        if self._roi.flip_lr:
-            self._transform = np.fliplr
-        elif self._roi.rotate == 'clockwise':
-            self._transform = lambda image: np.flipud(image.T)
-        elif self._roi.rotate == 'counterclockwise':
-            self._transform = lambda image: np.flipud(image).T
+        self._transformer = transformer
 
     def get(self, channel: str, z_offset: int, index: int):
         image, timestamp = self._image_stack.get(self._roi, channel, z_offset, index)
-        return Image(self._transform(image), index, timestamp, self._roi.field_of_view, channel, z_offset)
-
+        return Image(self._transformer(image), index, timestamp, self._roi.field_of_view, channel, z_offset)
