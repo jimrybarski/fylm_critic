@@ -88,26 +88,39 @@ class Frame(object):
 
 class ImageStack(object):
     """
-    Provides access to an HDF5 file containing our image data.
+    Provides access to raw image data in an HDF5 file.
 
     """
     def __init__(self, hdf5: HDF5File):
         self._hdf5 = hdf5
 
-    def get_roi(self, roi: RegionOfInterest, channel: str, z_level: int, index: int):
-        return self._hdf5['/%d/%s/%d' % (roi.field_of_view, channel, z_level)][roi.top_left.y: roi.bottom_right.y + 1,
-                                                                               roi.top_left.x: roi.bottom_right.y + 1,
-                                                                               index]
+    def get(self, roi: RegionOfInterest, channel: str, z_offset: int, index: int):
+        """ Loads a single image from disk. """
+        data = self._hdf5['/%d/%s/%d' % (roi.field_of_view, channel, z_offset)]
+        image = data[roi.top_left.y: roi.bottom_right.y + 1,
+                     roi.top_left.x: roi.bottom_right.y + 1,
+                     index]
+        timestamp = data.attrs['timestamp'][index]
+        return image, timestamp
 
 
-class ROIFrameIterator(object):
+class ROIStack(object):
     """
-    Creates Frames for a given RegionOfInterest.
+    Provides access to the image stack for a single region of interest, and automatically applies transformations.
 
     """
     def __init__(self, roi: RegionOfInterest, image_stack: ImageStack):
         self._roi = roi
         self._image_stack = image_stack
+        self._transform = lambda image: image
+        if self._roi.flip_lr:
+            self._transform = np.fliplr
+        elif self._roi.rotate == 'clockwise':
+            self._transform = lambda image: np.flipud(image.T)
+        elif self._roi.rotate == 'counterclockwise':
+            self._transform = lambda image: np.flipud(image).T
 
-    def __iter__(self):
-        pass
+    def get(self, channel: str, z_offset: int, index: int):
+        image, timestamp = self._image_stack.get(self._roi, channel, z_offset, index)
+        return Image(self._transform(image), index, timestamp, self._roi.field_of_view, channel, z_offset)
+
