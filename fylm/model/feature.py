@@ -1,4 +1,4 @@
-from model.coordinates import Point
+from fylm.model.coordinates import Point
 from enum import Enum, unique
 
 

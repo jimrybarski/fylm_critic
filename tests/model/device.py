@@ -1,7 +1,7 @@
 import unittest
 import hypothesis.strategies as st
 from hypothesis import given
-from model.device import Device
+from fylm.model.device import Device
 
 
 class DeviceTests(unittest.TestCase):

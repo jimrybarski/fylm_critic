@@ -1,4 +1,4 @@
-from model.image import Image
+from fylm.model.image import Image
 import numpy as np
 import unittest
 

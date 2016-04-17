@@ -1,8 +1,8 @@
-from model.roi import PombeCatchTube
-from model.coordinates import Point
+from fylm.model.roi import PombeCatchTube
+from fylm.model.coordinates import Point
 import unittest
 import numpy as np
-from model.image import Image
+from fylm.model.image import Image
 
 
 class TubeTests(unittest.TestCase):

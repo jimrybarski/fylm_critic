@@ -1,6 +1,6 @@
 from abc import abstractmethod
-from model.color import Color
-from model.coordinates import Point
+from fylm.model.color import Color
+from fylm.model.coordinates import Point
 from PIL import ImageDraw
 
 

@@ -1,4 +1,4 @@
-from model import color
+from fylm.model import color
 from hypothesis import given
 import hypothesis.strategies as st
 import unittest

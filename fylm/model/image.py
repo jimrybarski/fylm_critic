@@ -1,7 +1,7 @@
 import numpy as np
 from collections import defaultdict
 from typing import List
-from model.roi import RegionOfInterest
+from fylm.model.roi import RegionOfInterest
 from h5py import File as HDF5File
 
 
@@ -91,7 +91,13 @@ class ImageStack(object):
     Provides access to an HDF5 file containing our image data.
 
     """
-    pass
+    def __init__(self, hdf5: HDF5File):
+        self._hdf5 = hdf5
+
+    def get_roi(self, roi: RegionOfInterest, channel: str, z_level: int, index: int):
+        return self._hdf5['/%d/%s/%d' % (roi.field_of_view, channel, z_level)][roi.top_left.y: roi.bottom_right.y + 1,
+                                                                               roi.top_left.x: roi.bottom_right.y + 1,
+                                                                               index]
 
 
 class ROIFrameIterator(object):
@@ -99,9 +105,9 @@ class ROIFrameIterator(object):
     Creates Frames for a given RegionOfInterest.
 
     """
-    def __init__(self, roi: RegionOfInterest, hdf5: HDF5File):
+    def __init__(self, roi: RegionOfInterest, image_stack: ImageStack):
         self._roi = roi
-        self._hdf5 = hdf5
+        self._image_stack = image_stack
 
     def __iter__(self):
         pass
