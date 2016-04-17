@@ -3,6 +3,7 @@ from collections import defaultdict
 from typing import List
 from fylm.model.roi import RegionOfInterest
 from h5py import File as HDF5File
+from fylm.image import create_roi_transformer
 
 
 class Image(np.ndarray):
@@ -86,21 +87,6 @@ class Frame(object):
         return self._images.get(channel).get(z_offset)
 
 
-
-class ImageTransformer(object):
-    def __init__(self, roi):
-        self._action = lambda image: image
-        if roi.flip_lr:
-            self._action = np.fliplr
-        elif roi.rotate == 'clockwise':
-            self._action = lambda image: np.flipud(image).T
-        elif roi.rotate == 'counterclockwise':
-            self._action = lambda image: np.flipud(image.T)
-
-    def __call__(self, image):
-        return self._action(image)
-
-
 class ImageStack(object):
     """
     Provides access to raw image data in an HDF5 file.
@@ -124,7 +110,7 @@ class ROIStack(object):
     Provides access to the image stack for a single region of interest, and automatically applies transformations.
 
     """
-    def __init__(self, roi: RegionOfInterest, image_stack: ImageStack, transformer: ImageTransformer):
+    def __init__(self, roi: RegionOfInterest, image_stack: ImageStack, transformer):
         self._roi = roi
         self._image_stack = image_stack
         self._transformer = transformer
