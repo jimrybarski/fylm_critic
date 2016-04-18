@@ -1,9 +1,6 @@
 import numpy as np
 from collections import defaultdict
 from typing import List
-from fylm.model.roi import RegionOfInterest
-from h5py import File as HDF5File
-from fylm.image import create_roi_transformer
 
 
 class Image(np.ndarray):
@@ -85,36 +82,3 @@ class Frame(object):
 
         """
         return self._images.get(channel).get(z_offset)
-
-
-class ImageStack(object):
-    """
-    Provides access to raw image data in an HDF5 file.
-
-    """
-    def __init__(self, hdf5: HDF5File):
-        self._hdf5 = hdf5
-
-    def get(self, roi: RegionOfInterest, channel: str, z_offset: int, index: int):
-        """ Loads a single image from disk. """
-        data = self._hdf5['/%d/%s/%d' % (roi.field_of_view, channel, z_offset)]
-        image = data[roi.top_left.y: roi.bottom_right.y + 1,
-                     roi.top_left.x: roi.bottom_right.y + 1,
-                     index]
-        timestamp = data.attrs['timestamp'][index]
-        return image, timestamp
-
-
-class ROIStack(object):
-    """
-    Provides access to the image stack for a single region of interest, and automatically applies transformations.
-
-    """
-    def __init__(self, roi: RegionOfInterest, image_stack: ImageStack, transformer):
-        self._roi = roi
-        self._image_stack = image_stack
-        self._transformer = transformer
-
-    def get(self, channel: str, z_offset: int, index: int):
-        image, timestamp = self._image_stack.get(self._roi, channel, z_offset, index)
-        return Image(self._transformer(image), index, timestamp, self._roi.field_of_view, channel, z_offset)

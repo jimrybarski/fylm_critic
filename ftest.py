@@ -1,11 +1,21 @@
-from fylm.model.device import Device
-import matplotlib.pyplot as plt
-import logging
+from fylm.model.roi import RegionOfInterest
+from fylm.model.coordinates import Point
+from fylm.visualization import Movie, Figure, MovieCreator, save
+from fylm.image import ImageStack, ROIStack
 
-plt.style.use('ggplot')
+image_stack = ImageStack("/var/experiment/161010.h5")
 
-stream_handler = logging.StreamHandler()
-stream_handler.setLevel(logging.DEBUG)
-log = logging.getLogger()
-log.addHandler(stream_handler)
-log.setLevel(logging.DEBUG)
+
+figs = [Movie(),
+        Movie(),
+        Movie(),
+        Movie(),
+        Figure()]
+
+save(image_stack, figs)
+
+
+# typical! but we can also stream a single movie if we want
+tube = RegionOfInterest(1, 3, Point(3, 4), Point(1, 2))
+movie = Movie()
+mc = MovieCreator(movie, tube)
