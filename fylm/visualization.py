@@ -8,8 +8,9 @@ class MovieCreator(object):
     Combines data sources to produce frames of a movie.
 
     """
-    def __init__(self, movie: Movie, roi: RegionOfInterest):
+    def __init__(self, movie: Movie, rois: List[RegionOfInterest]):
         self._movie = movie
+        self._rois = rois
 
     def __iter__(self):
         pass
