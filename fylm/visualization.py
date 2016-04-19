@@ -1,6 +1,5 @@
 from fylm.model.roi import RegionOfInterest
-from fylm.image import ImageStack
-from typing import Union, List
+from typing import List
 
 
 class MovieCreator(object):
@@ -51,18 +50,6 @@ class Figure(object):
 
 class FeatureIndicator(object):
     """
-
-    """
-    pass
-
-
-def save(image_stack: ImageStack, visualizations: List[Union[Movie, Figure]]):
-    """
-    Writes movies and figures to disk.
-
-    Parameters
-    ----------
-    visualizations: a list of Movies and/or Figures
 
     """
     pass
