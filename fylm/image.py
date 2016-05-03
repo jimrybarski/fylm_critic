@@ -28,7 +28,14 @@ class ImageStack(object):
 
     """
     def __init__(self, filename: str):
-        self._hdf5 = HDF5File(filename, 'a')
+        self._filename = filename
+        self._hdf5 = None
+
+    def __enter__(self):
+        self._hdf5 = HDF5File(self._filename, 'a')
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._hdf5.close()
 
     def get(self, roi: RegionOfInterest, channel: str, z_offset: int, index: int):
         """ Loads a single image from disk. """

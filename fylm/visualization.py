@@ -25,6 +25,7 @@ class FigureCreator(object):
     """
     def __init__(self, figure: Figure, roi: RegionOfInterest):
         self._figure = figure
+        self._roi = roi
 
 
 class Movie(object):
