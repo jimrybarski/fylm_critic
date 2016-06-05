@@ -1,18 +1,17 @@
 import sys
-from PyQt5.QtWidgets import (QWidget, QHBoxLayout,
-    QLabel, QApplication)
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
+    QLabel, QApplication, QBoxLayout)
 from PyQt5.QtCore import (qAbs, QLineF, QPointF, QRectF, qrand, qsrand, Qt,
-        QTime, QTimer)
+        QTime, QTimer, QSize)
 from PyQt5.QtGui import QColor, QPainter, QPalette, QPen
 from PyQt5.QtGui import (QBrush, QColor, QPainter, QPainterPath, QPixmap,
         QPolygonF)
 from PyQt5.QtWidgets import (QApplication, QGraphicsItem, QGraphicsRectItem, QGraphicsScene,
-        QGraphicsView, QGraphicsWidget, QScrollArea)
+        QGraphicsView, QGridLayout, QGraphicsWidget, QScrollArea, QPushButton)
 from PyQt5.QtGui import QPixmap, QImage, qRgb
 import numpy as np
 import h5py
-from skimage import io
-from fylm.model.color import convert_to_rgb, Color
+from fylm.model.color import Color
 
 green = QColor(50, 250, 50)
 red = QColor(250, 50, 50)
@@ -66,6 +65,51 @@ class FYLMGraphicsView(QGraphicsView):
         self.scene.addItem(rect)
 
 
+class WooButton(QPushButton):
+    def __init__(self):
+        super().__init__("Woo")
+        self.clicked.connect(self.woo)
+
+    def woo(self):
+        print("\n".join(dir(self)))
+        self.setText("Wooooooooo")
+
+
+class DoneButton(QPushButton):
+    def __init__(self):
+        super().__init__("Done")
+        self.clicked.connect(self.done)
+
+    def done(self):
+        print("done")
+
+
+class DirectionButton(QPushButton):
+    def __init__(self, direction):
+        assert direction in ('<', '>')
+        super().__init__(direction)
+        action = self._left if direction == '<' else self._right
+        self.clicked.connect(action)
+
+    def sizeHint(self):
+        return QSize(50, 25)
+
+    def _left(self):
+        pass
+
+    def _right(self):
+        pass
+
+
+class ButtonRowLayout(QHBoxLayout):
+    def __init__(self):
+        super().__init__()
+        self.addWidget(DoneButton())
+        self.addWidget(DirectionButton('<'))
+        self.addWidget(QLabel("1/13"))
+        self.addWidget(DirectionButton('>'))
+
+
 if __name__ == '__main__':
 
     app = QApplication(sys.argv)
@@ -73,23 +117,33 @@ if __name__ == '__main__':
     with h5py.File("/var/fylm3/FYLM-160329.h5", "a") as h5:
         image = h5['/%d/%s/%d' % (0, "BF", 0)]['0'].value
         image = ((image / np.max(image)) * 255).astype(np.uint8)
-        flimage = gfp.convert(h5['/%d/%s/%d' % (0, "GFP", 0)]['0'].value) * 5
-        bfimage = convert_to_rgb(h5['/%d/%s/%d' % (0, "BF", 0)]['0'].value) * 10
-        combo = flimage + bfimage
 
-    # qim = QImage(combo, combo.shape[1], combo.shape[0], combo.strides[0], QImage.Format_Indexed8)
-    gray_color_table = [qRgb(i, i, i) for i in range(256)]
-    qim = QImage(combo.data, combo.shape[1], combo.shape[0], combo.strides[0], QImage.Format_RGB888)
-    qim.setColorTable(gray_color_table)
+    qim = QImage(image, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Indexed8)
+    # gray_color_table = [qRgb(i, i, i) for i in range(256)]
+    # qim = QImage(combo.data, combo.shape[1], combo.shape[0], combo.strides[0], QImage.Format_RGB888)
+    # qim.setColorTable(gray_color_table)
+    minimage = np.copy(image[400:600, 400:800])
+    miniqim = QImage(minimage, minimage.shape[1], minimage.shape[0], minimage.strides[0], QImage.Format_Indexed8)
+
     pixmap = QPixmap.fromImage(qim).scaled(1080, 1280)
     view = FYLMGraphicsView()
     view.scene.addPixmap(pixmap)
-    view.show()
 
+    minpixmap = QPixmap.fromImage(miniqim)
+    miniview = QLabel()
+    miniview.setPixmap(minpixmap)
+
+    graphics_layout = QVBoxLayout()
+    graphics_layout.addWidget(view)
+    window = QWidget()
+    layout = QVBoxLayout()
+    layout.addItem(graphics_layout)
+    layout.addItem(ButtonRowLayout())
+    layout.addWidget(miniview)
+    window.setLayout(layout)
+    window.show()
     app.exec_()
-    for item in view.scene.items():
-        if type(item) not in (NegativeExample, PositiveExample):
-            continue
-        x1, y1, x2, y2 = item.bounds
-        io.imshow(combo[y1:y2, x1:x2, :])
-        io.show()
+    # for item in view.scene.items():
+    #     if type(item) not in (NegativeExample, PositiveExample):
+    #         continue
+    #     x1, y1, x2, y2 = item.bounds

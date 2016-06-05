@@ -9,8 +9,8 @@ class Image(np.ndarray):
 
     """
     @property
-    def index(self) -> int:
-        return self._index
+    def frame(self) -> int:
+        return self._frame
 
     @property
     def timestamp(self) -> float:
@@ -30,15 +30,15 @@ class Image(np.ndarray):
 
     # end users will not need to know anything about the methods below
 
-    def __new__(cls, array, index: int, timestamp: float, field_of_view: int, channel: str, z_offset: int):
+    def __new__(cls, array, frame: int, timestamp: float, field_of_view: int, channel: str, z_offset: int):
         return np.asarray(array).view(cls)
 
-    def __init__(self, array, index: int, timestamp: float, field_of_view: int, channel: str, z_offset: int):
-        assert index >= 0
+    def __init__(self, array, frame: int, timestamp: float, field_of_view: int, channel: str, z_offset: int):
+        assert frame >= 0
         assert timestamp >= 0.0
         assert field_of_view >= 0
         assert len(channel) > 0
-        self._index = index
+        self._frame = frame
         self._timestamp = timestamp
         self._field_of_view = field_of_view
         self._channel = channel
@@ -51,10 +51,10 @@ class Image(np.ndarray):
             return obj
 
     def __hash__(self) -> int:
-        return hash((self.index, self.timestamp, self.field_of_view, self.channel))
+        return hash((self.frame, self.timestamp, self.field_of_view, self.channel))
 
     def __eq__(self, other) -> bool:
-        return other.index == self.index and other.timestamp == self.timestamp \
+        return other.index == self.frame and other.timestamp == self.timestamp \
                and other.field_of_view == self.field_of_view and other.channel == self.channel \
                and other.z_offset == self.z_offset
 
@@ -65,7 +65,7 @@ class Frame(object):
 
     """
     def __init__(self, images: List[Image]):
-        assert len(set(image.index for image in images)) == 1, 'Frame was given images from separate time indexes'
+        assert len(set(image.frame for image in images)) == 1, 'Frame was given images from separate time indexes'
         assert len(set(image.field_of_view for image in images)) == 1, 'Frame was given images from separate fields of view'
         self._images = defaultdict(dict)
         for image in images:

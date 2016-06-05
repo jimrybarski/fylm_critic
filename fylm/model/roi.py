@@ -1,14 +1,13 @@
 from fylm.model.coordinates import Point
-from typing import Union
+from fylm.model.constants import RotationDirection
 
 
 class RegionOfInterest(object):
     def __init__(self, id_number: int, field_of_view: int, top_left: Point, bottom_right: Point,
-                 flip_lr: bool=False, rotate: Union[bool, str]=False):
+                 rotate: RotationDirection, flip_lr: bool=False):
         assert top_left.x < bottom_right.x
         assert top_left.y < bottom_right.y
         assert not all((flip_lr, rotate))
-        assert rotate in (False, 'clockwise', 'counterclockwise')
 
         self._id = id_number
         self._top_left = top_left
@@ -38,5 +37,5 @@ class RegionOfInterest(object):
         return self._flip_lr
 
     @property
-    def rotate(self) -> Union[bool, str]:
+    def rotate(self) -> RotationDirection:
         return self._rotate
