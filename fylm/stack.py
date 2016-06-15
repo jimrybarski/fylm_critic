@@ -31,19 +31,11 @@ class TiffReader(TiffFile):
         self._index_map = self.micromanager_metadata['index_map']
         self._channel_names = self.micromanager_metadata['summary']['ChNames']
 
-    # @property
-    # def indexes(self):
-    #     for n, (fov, frame, channel, z_level) in enumerate(zip(self._index_map['position'],
-    #                                                            self._index_map['frame'],
-    #                                                            self._index_map['channel'],
-    #                                                            self._index_map['slice'])):
-    #         yield n, fov, frame, channel, z_level
-
     def __iter__(self):
         for n, tif in enumerate(super().__iter__()):
             yield self[n]
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int):
         fov = self._index_map['position'][index]
         frame = self._index_map['frame'][index]
         channel = self._channel_names[self._index_map['channel'][index]]
@@ -87,7 +79,21 @@ class ImageStack(object):
         return image, timestamp
 
     def _get_data(self, field_of_view: int, channel: str, z_offset: int, index):
-        return self._hdf5['/%d/%s/%d/%d' % (field_of_view, channel, z_offset, index)]
+        index = '/%d/%s/%d/%d' % (field_of_view, channel, z_offset, index)
+        data = self._hdf5.get(index)
+        if data is None:
+            raise ImageDoesNotExist(index)
+        return data
+
+
+class ImageDoesNotExist(Exception):
+    """
+    You tried to get an image that doesn't exist.
+
+    """
+    def __init__(self, index):
+        super().__init__()
+        self.message = index
 
 
 class ROIStack(object):
