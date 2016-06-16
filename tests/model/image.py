@@ -10,7 +10,6 @@ class TestImage(unittest.TestCase):
         self.zeros = Image(np.zeros((512, 512)).astype(np.uint16), 13, 23562136136.311241, 8, 'GFP', 0)
 
     def test_attributes(self):
-        self.assertEqual(self.image.index, 13)
         self.assertEqual(self.image.timestamp, 23562136136.311241)
         self.assertEqual(self.image.field_of_view, 8)
         self.assertEqual(self.image.channel, 'GFP')

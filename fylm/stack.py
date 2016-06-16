@@ -5,6 +5,7 @@ import numpy as np
 from fylm.alignment import cw_rotate, ccw_rotate
 from fylm.model.constants import RotationDirection
 from tifffile import TiffFile
+from typing import Iterable
 
 
 def create_roi_transformer(roi: RegionOfInterest):
@@ -26,16 +27,16 @@ def create_roi_transformer(roi: RegionOfInterest):
 
 
 class TiffReader(TiffFile):
-    def __init__(self, filename):
+    def __init__(self, filename: str):
         super().__init__(filename)
         self._index_map = self.micromanager_metadata['index_map']
         self._channel_names = self.micromanager_metadata['summary']['ChNames']
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[Image]:
         for n, tif in enumerate(super().__iter__()):
             yield self[n]
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int) -> Image:
         fov = self._index_map['position'][index]
         frame = self._index_map['frame'][index]
         channel = self._channel_names[self._index_map['channel'][index]]

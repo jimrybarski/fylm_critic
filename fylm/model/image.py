@@ -9,6 +9,10 @@ class Image(np.ndarray):
 
     """
     @property
+    def index(self) -> str:
+        return '%d/%d/%s/%d' % (self.field_of_view, self.frame, self.channel, self.z_offset)
+
+    @property
     def frame(self) -> int:
         return self._frame
 

@@ -8,7 +8,6 @@ class DeviceTests(unittest.TestCase):
     @given(st.integers())
     def test_enums_work(self, number):
         assert Device.original != number
-        assert Device.hexaplex != number
         assert Device.plinko != number
         assert Device.cerevisiae != number
 
