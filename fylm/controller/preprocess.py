@@ -23,6 +23,8 @@ def main(tif_directory: str, hdf5_filename: str, device: Device, brightfield_cha
         for image in alignment.load_new_nonfirst_brightfield_focused_images(tif_filenames,
                                                                             brightfield_channel,
                                                                             current_image_indices):
-            registered_image = alignment.make_registered_image(image, device, rotated_images)
+            rotation = rotated_images[image.field_of_view].rotation
+            source_image = rotated_images[image.field_of_view].image
+            registered_image = alignment.make_registered_image(image, device, rotation, source_image)
             image_stack[image.index] = registered_image
             image_stack[image.index].attrs['rotation'] = image.rotation

@@ -1,11 +1,12 @@
 from fylm.model.device import Device
-import numpy as np
-import logging
 from fylm.model.image import Image
+from fylm import stack, rotate
+import logging
+import numpy as np
 import os
 from skimage import transform, feature
 from typing import Set, Tuple, Iterable, Dict
-from fylm import stack, rotate
+
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +23,7 @@ class AdjustedImage(object):
 
 
 def create_missing_rotated_images(brightfield_channel: str, device: Device, tif_filenames: Iterable[str],
-                                  hdf5_filename: str, rotated_images: Dict[int: AdjustedImage]):
+                                  hdf5_filename: str, rotated_images: Dict[int, AdjustedImage]):
     rotation_calculator = _get_rotation_calculator(device)
     images = _load_primary_images(brightfield_channel, device, tif_filenames)
     with stack.ImageStack(hdf5_filename) as image_stack:
@@ -38,12 +39,11 @@ def load_current_image_indices(hdf5_filename: str):
 
 
 def make_registered_image(image: Image,
-                           device: Device,
-                           rotated_images: Dict[int: AdjustedImage]) -> AdjustedImage:
+                          device: Device,
+                          rotation: float,
+                          source_image: np.ndarray) -> AdjustedImage:
     normalized_image = _normalize_image(image, device)
-    rotation = rotated_images[image.field_of_view].rotation
     rotated_image = transform.rotate(normalized_image, rotation)
-    source_image = rotated_images[image.field_of_view].image
     (y, x), error, phase = feature.register_translation(source_image,
                                                         rotated_image,
                                                         upsample_factor=20)
@@ -110,7 +110,7 @@ def load_tifs_filenames(tif_directory: str) -> Iterable[str]:
     return tifs
 
 
-def load_existing_rotations(hdf5_filename: str, fields_of_view: Set[int], brightfield_channel: str) -> Dict[int: AdjustedImage]:
+def load_existing_rotations(hdf5_filename: str, fields_of_view: Set[int], brightfield_channel: str) -> Dict[int, AdjustedImage]:
     # we're only concerned with rotations for now, and not registrations, because all registrations
     # are based on the first image
 

@@ -2,7 +2,7 @@ from fylm.model.roi import RegionOfInterest
 from fylm.model.image import Image
 from h5py import File as HDF5File
 import numpy as np
-from fylm.alignment import cw_rotate, ccw_rotate
+from fylm import alignment
 from fylm.model.constants import RotationDirection
 from tifffile import TiffFile
 from typing import Iterable
@@ -19,9 +19,9 @@ def create_roi_transformer(roi: RegionOfInterest):
     if roi.flip_lr:
         return np.fliplr
     elif roi.rotate == RotationDirection.clockwise:
-        return lambda image: cw_rotate(image)
+        return lambda image: alignment.cw_rotate(image)
     elif roi.rotate == RotationDirection.counterclockwise:
-        return lambda image: ccw_rotate(image)
+        return lambda image: alignment.ccw_rotate(image)
     else:
         return lambda image: image
 
