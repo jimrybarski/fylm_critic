@@ -1,5 +1,6 @@
 from fylm.model.device import Device
-from fylm.model.image import Image
+from fylm.model.image import Image, LazyTif
+from fylm.rotate import RotationCalculator
 from fylm import stack, rotate
 import logging
 import numpy as np
@@ -16,26 +17,30 @@ class AdjustedImage(object):
     Holds an image and the alignments that have been performed on it.
 
     """
-    def __init__(self, image: Image, rotation: float, registration: Tuple[float, float]=None):
+    def __init__(self, image: Image, rotation: float, registration: Tuple[float, float]=(0, 0)):
         self.image = image
         self.rotation = rotation
         self.registration = registration
 
 
-def create_missing_rotated_images(brightfield_channel: str, device: Device, tif_filenames: Iterable[str],
-                                  hdf5_filename: str, rotated_images: Dict[int, AdjustedImage]):
-    rotation_calculator = _get_rotation_calculator(device)
-    images = _load_primary_images(brightfield_channel, device, tif_filenames)
-    with stack.ImageStack(hdf5_filename) as image_stack:
-        for image, rotation in _make_rotated_missing_images(images, rotation_calculator):
-            image_stack[image.index] = image
-            image_stack[image.index].attrs['rotation'] = rotation
-            rotated_images[image.field_of_view] = AdjustedImage(image, rotation)
+def create_missing_rotated_images(brightfield_channel: str, device: Device, tifs: Iterable[LazyTif],
+                                  image_stack: stack.ImageStack, rotation_calculator: RotationCalculator,
+                                  rotated_images: Dict[int, AdjustedImage]):
+    normalized_primary_images = _get_normalized_primary_images(brightfield_channel, device, tifs)
+    for image, rotation in _make_rotated_missing_images(normalized_primary_images, rotation_calculator):
+        image_stack[image.index] = image
+        image_stack[image.index].attrs['rotation'] = rotation
+        image_stack[image.index].attrs['registration'] = (0.0, 0.0)
+        rotated_images[image.field_of_view] = AdjustedImage(image, rotation)
 
 
-def load_current_image_indices(hdf5_filename: str):
-    with stack.ImageStack(hdf5_filename) as h5:
-        return tuple(h5.keys())
+def _get_normalized_primary_images(brightfield_channel: str, device: Device, tifs: Iterable[LazyTif]) -> Iterable[Image]:
+    for tif in tifs:
+        is_primary_image = tif.frame == 0 and tif.z_offset == 0 and tif.channel == brightfield_channel
+        if is_primary_image:
+            normalized_image = _normalize_image(tif.image_data, device)
+            yield Image(normalized_image, tif.frame, tif.timestamp,
+                        tif.field_of_view, tif.channel, tif.z_offset)
 
 
 def make_registered_image(image: Image,
@@ -60,19 +65,21 @@ def _make_rotated_missing_images(images: Iterable[Image],
     for normalized_image in images:
         # calculate how much we should rotate the image
         rotation = rotation_calculator.calculate(normalized_image)
-        return transform.rotate(normalized_image, rotation), rotation
+        return Image.combine(transform.rotate(normalized_image), normalized_image), rotation
 
 
-def load_new_nonfirst_brightfield_focused_images(tif_filenames: Iterable[str], brightfield_channel: str, current_indices: tuple):
-    for tif_filename in tif_filenames:
-        with stack.TiffReader(tif_filename) as tif:
-            for raw_image in tif:
-                if raw_image.channel != brightfield_channel or raw_image.z_offset != 0 or raw_image.frame == 0 or raw_image.index in current_indices:
-                    continue
-                yield raw_image
+def load_new_nonfirst_brightfield_focused_images(tifs: Iterable[LazyTif],
+                                                 brightfield_channel: str,
+                                                 image_stack: stack.ImageStack):
+    # Loads TIFs if they're not already in the HDF5.
+    for tif in tifs:
+        current_indices = image_stack.indices(tif.field_of_view, tif.channel, tif.z_offset)
+        if tif.channel != brightfield_channel or tif.z_offset != 0 or tif.frame == 0 or tif.index in current_indices:
+            continue
+        yield tif
 
 
-def _get_rotation_calculator(device: Device) -> rotate.RotationCalculator:
+def get_rotation_calculator(device: Device) -> rotate.RotationCalculator:
     calculator = {device.original: rotate.FYLMRotationCalc,
                   device.plinko: rotate.PlinkoRotationCalc,
                   device.cerevisiae: rotate.CerevisiaeRotationCalc,
@@ -80,53 +87,37 @@ def _get_rotation_calculator(device: Device) -> rotate.RotationCalculator:
     return calculator[device](device)
 
 
-def _load_primary_images(brightfield_channel: str, device: Device, tif_filenames: Iterable[str]) -> Iterable[Image]:
-    for tif_filename in tif_filenames:
-        with stack.TiffReader(tif_filename) as tif:
-            for raw_image in tif:
-                is_primary_image = raw_image.frame == 0 and raw_image.z_offset == 0 and raw_image.channel == brightfield_channel
-                if is_primary_image:
-                    normalized_image = _normalize_image(raw_image, device)
-                    yield Image(normalized_image, raw_image.frame, raw_image.timestamp,
-                                raw_image.field_of_view, raw_image.channel, raw_image.z_offset)
+def get_fields_of_view(tifs: Iterable[LazyTif]) -> set:
+    return {tif.field_of_view for tif in tifs}
 
 
-def load_fields_of_view(tif_filenames: Iterable[str]) -> set:
-    fields_of_view = set()
-    for tif_filename in tif_filenames:
-        with stack.TiffReader(tif_filename) as tif:
-            index_map = tif.micromanager_metadata['index_map']
-            for fov in index_map['position']:
-                fields_of_view.add(int(fov))
-    return fields_of_view
-
-
-def load_tifs_filenames(tif_directory: str) -> Iterable[str]:
+def load_tifs(tif_directory: str) -> Iterable[LazyTif]:
     tifs = tuple([os.path.join(tif_directory, tif) for tif in os.listdir(tif_directory) if tif.endswith('.ome.tif')])
     if len(tifs) == 0:
         raise ValueError("No TIFFs were found! "
                          "We need them in the preprocessing step to know if the HDF5 file has "
                          "all the fields of view!")
-    return tifs
+    for tif_filename in tifs:
+        with stack.TiffReader(tif_filename) as tif:
+            yield from tif
 
 
-def load_existing_rotations(hdf5_filename: str, fields_of_view: Set[int], brightfield_channel: str) -> Dict[int, AdjustedImage]:
+def load_existing_rotations(image_stack: stack.ImageStack, fields_of_view: Set[int], brightfield_channel: str) -> Dict[int, AdjustedImage]:
     # we're only concerned with rotations for now, and not registrations, because all registrations
     # are based on the first image
 
     # build up a dictionary of all first images, starting with the h5 data first
     # if we still don't have all of them, get the raw data from the TIFs
     rotated_images = {}
-    with stack.ImageStack(hdf5_filename) as h5:
-        for fov in fields_of_view:
-            try:
-                image = h5.get_image(fov, brightfield_channel, 0, 0)
-                rotation = h5.get_attrs(fov, brightfield_channel, 0, 0).get('rotation')
-                assert rotation is not None, "HDF5 is missing data: " \
-                                             "it has images without rotation data in the metadata"
-                rotated_images[fov] = AdjustedImage(image, rotation)
-            except stack.ImageDoesNotExist:
-                pass
+    for fov in fields_of_view:
+        try:
+            image = image_stack.get_image(fov, brightfield_channel, 0, 0)
+            rotation = image_stack.get_attrs(fov, brightfield_channel, 0, 0).get('rotation')
+            assert rotation is not None, "HDF5 is missing data: " \
+                                         "it has images without rotation data in the metadata"
+            rotated_images[fov] = AdjustedImage(image, rotation)
+        except stack.ImageDoesNotExist:
+            pass
     return rotated_images
 
 
@@ -138,16 +129,17 @@ def _normalize_image(image: np.ndarray, device: Device) -> np.ndarray:
 
 
 def cw_rotate(image: np.ndarray) -> np.ndarray:
+    assert image.shape[0] > 0 and image.shape[1] > 0
     return np.flipud(image).T
 
 
 def ccw_rotate(image: np.ndarray) -> np.ndarray:
+    assert image.shape[0] > 0 and image.shape[1] > 0
     return np.flipud(image.T)
 
 
 def crop(image: np.ndarray, margin_percent: float) -> np.ndarray:
-    # sometimes we snag corners, by cropping the left and right 10% of the image we focus only on the
-    # vertical bars formed by the structure
+    assert image.shape[0] > 0 and image.shape[1] > 0
     height, width = image.shape
     margin = int(width * margin_percent)
     return image[:, margin: width - margin]

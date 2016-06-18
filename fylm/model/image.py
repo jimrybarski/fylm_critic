@@ -3,11 +3,63 @@ from collections import defaultdict
 from typing import List
 
 
+class LazyTif(np.ndarray):
+    """
+    Holds metadata for a tif and a reference to the image data, but does not read the data from disk until requested.
+
+    """
+    def __init__(self, image_reference, frame: int, timestamp: float, field_of_view: int, channel: str, z_offset: int):
+        assert frame >= 0
+        assert timestamp >= 0.0
+        assert field_of_view >= 0
+        assert len(channel) > 0
+        self._image_reference = image_reference
+        self._frame = frame
+        self._timestamp = timestamp
+        self._field_of_view = field_of_view
+        self._channel = channel
+        self._z_offset = z_offset
+
+    @property
+    def image_data(self):
+        return self._image_reference.asarray()
+
+    @property
+    def index(self) -> str:
+        return '%d/%d/%s/%d' % (self.field_of_view, self.frame, self.channel, self.z_offset)
+
+    @property
+    def frame(self) -> int:
+        return self._frame
+
+    @property
+    def timestamp(self) -> float:
+        return self._timestamp
+
+    @property
+    def field_of_view(self) -> int:
+        return self._field_of_view
+
+    @property
+    def channel(self) -> str:
+        return self._channel
+
+    @property
+    def z_offset(self) -> int:
+        return self._z_offset
+
+
 class Image(np.ndarray):
     """
     Holds the raw pixel data of an image and provides access to some metadata.
 
     """
+    @staticmethod
+    def combine(array: np.ndarray, image: 'Image'):
+        # takes the pixel data from one source and the metadata from another Image and
+        # combines them to create a new Image
+        return Image(array, image.frame, image.timestamp, image.field_of_view, image.channel, image.z_offset)
+
     @property
     def index(self) -> str:
         return '%d/%d/%s/%d' % (self.field_of_view, self.frame, self.channel, self.z_offset)
