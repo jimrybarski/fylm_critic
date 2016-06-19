@@ -4,7 +4,6 @@ from fylm.rotate import RotationCalculator
 from fylm import stack, rotate
 import logging
 import numpy as np
-import os
 from skimage import transform, feature
 from typing import Set, Tuple, Iterable, Dict
 
