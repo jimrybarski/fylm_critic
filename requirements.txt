@@ -1,9 +1,10 @@
-numpy 
-scipy 
-matplotlib 
-h5py 
-pandas
-hypothesis
 cython
+hypothesis
+h5py
+matplotlib
+numpy
+pandas
 scikit-image
 scikit-learn
+scipy
+tifffile
