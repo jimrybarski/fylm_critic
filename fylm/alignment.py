@@ -2,7 +2,9 @@ from fylm.model.device import Device
 from fylm.model.image import Image, LazyTif
 from fylm.rotate import RotationCalculator
 from fylm import stack, rotate
+from fylm import image as fimage
 import logging
+import os
 import numpy as np
 from skimage import transform, feature
 from typing import Set, Tuple, Iterable, Dict
@@ -22,8 +24,11 @@ class AdjustedImage(object):
         self.registration = registration
 
 
-def create_missing_rotated_images(brightfield_channel: str, device: Device, tifs: Iterable[LazyTif],
-                                  image_stack: stack.ImageStack, rotation_calculator: RotationCalculator,
+def create_missing_rotated_images(brightfield_channel: str,
+                                  device: Device,
+                                  tifs: Iterable[LazyTif],
+                                  image_stack: stack.ImageStack,
+                                  rotation_calculator: RotationCalculator,
                                   rotated_images: Dict[int, AdjustedImage]):
     normalized_primary_images = _get_normalized_primary_images(brightfield_channel, device, tifs)
     for image, rotation in _make_rotated_missing_images(normalized_primary_images, rotation_calculator):
@@ -33,7 +38,9 @@ def create_missing_rotated_images(brightfield_channel: str, device: Device, tifs
         rotated_images[image.field_of_view] = AdjustedImage(image, rotation)
 
 
-def _get_normalized_primary_images(brightfield_channel: str, device: Device, tifs: Iterable[LazyTif]) -> Iterable[Image]:
+def _get_normalized_primary_images(brightfield_channel: str,
+                                   device: Device,
+                                   tifs: Iterable[LazyTif]) -> Iterable[Image]:
     for tif in tifs:
         is_primary_image = tif.frame == 0 and tif.z_offset == 0 and tif.channel == brightfield_channel
         if is_primary_image:
@@ -64,12 +71,12 @@ def _make_rotated_missing_images(images: Iterable[Image],
     for normalized_image in images:
         # calculate how much we should rotate the image
         rotation = rotation_calculator.calculate(normalized_image)
-        return Image.combine(transform.rotate(normalized_image), normalized_image), rotation
+        return Image.combine(transform.rotate(normalized_image, rotation), normalized_image), rotation
 
 
-def load_new_nonfirst_brightfield_focused_images(tifs: Iterable[LazyTif],
-                                                 brightfield_channel: str,
-                                                 image_stack: stack.ImageStack):
+def get_new_nonfirst_brightfield_focused_images(tifs: Iterable[LazyTif],
+                                                brightfield_channel: str,
+                                                image_stack: stack.ImageStack):
     # Loads TIFs if they're not already in the HDF5.
     for tif in tifs:
         current_indices = image_stack.indices(tif.field_of_view, tif.channel, tif.z_offset)
@@ -101,7 +108,9 @@ def load_tifs(tif_directory: str) -> Iterable[LazyTif]:
             yield from tif
 
 
-def load_existing_rotations(image_stack: stack.ImageStack, fields_of_view: Set[int], brightfield_channel: str) -> Dict[int, AdjustedImage]:
+def get_existing_rotations(image_stack: stack.ImageStack,
+                           fields_of_view: Set[int],
+                           brightfield_channel: str) -> Dict[int, AdjustedImage]:
     # we're only concerned with rotations for now, and not registrations, because all registrations
     # are based on the first image
 
@@ -122,23 +131,6 @@ def load_existing_rotations(image_stack: stack.ImageStack, fields_of_view: Set[i
 
 def _normalize_image(image: np.ndarray, device: Device) -> np.ndarray:
     if device == Device.original:
-        return crop(cw_rotate(image), 0.1)
+        return fimage.crop(fimage.cw_rotate(image), 0.1)
     else:
         raise ValueError("Normalizing image not implemented for your device")
-
-
-def cw_rotate(image: np.ndarray) -> np.ndarray:
-    assert image.shape[0] > 0 and image.shape[1] > 0
-    return np.flipud(image).T
-
-
-def ccw_rotate(image: np.ndarray) -> np.ndarray:
-    assert image.shape[0] > 0 and image.shape[1] > 0
-    return np.flipud(image.T)
-
-
-def crop(image: np.ndarray, margin_percent: float) -> np.ndarray:
-    assert image.shape[0] > 0 and image.shape[1] > 0
-    height, width = image.shape
-    margin = int(width * margin_percent)
-    return image[:, margin: width - margin]

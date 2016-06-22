@@ -14,7 +14,7 @@ def main(tif_directory: str, hdf5_filename: str, device: Device, brightfield_cha
     fields_of_view = alignment.get_fields_of_view(tifs)
 
     with stack.ImageStack(hdf5_filename) as image_stack:
-        rotated_images = alignment.load_existing_rotations(image_stack, fields_of_view, brightfield_channel)
+        rotated_images = alignment.get_existing_rotations(image_stack, fields_of_view, brightfield_channel)
         missing_first_images = len(fields_of_view) > len(rotated_images)
         if missing_first_images:
             tifs = alignment.load_tifs(tif_directory)
@@ -24,9 +24,9 @@ def main(tif_directory: str, hdf5_filename: str, device: Device, brightfield_cha
 
         # Go back and make sure we have all the registered images
         tifs = alignment.load_tifs(tif_directory)
-        for image in alignment.load_new_nonfirst_brightfield_focused_images(tifs,
-                                                                            brightfield_channel,
-                                                                            image_stack):
+        for image in alignment.get_new_nonfirst_brightfield_focused_images(tifs,
+                                                                           brightfield_channel,
+                                                                           image_stack):
             rotation = rotated_images[image.field_of_view].rotation
             source_image = rotated_images[image.field_of_view].image
             registered_image = alignment.make_registered_image(image, device, rotation, source_image)

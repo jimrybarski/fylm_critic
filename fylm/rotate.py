@@ -103,5 +103,3 @@ class CerevisiaeRotationCalc(RotationCalculator):
 
     def calculate(self, image: np.ndarray) -> float:
         raise NotImplementedError("Jim hasn't written a method to process cerevisiae images yet")
-
-
