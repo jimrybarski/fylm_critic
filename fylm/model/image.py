@@ -3,7 +3,7 @@ from collections import defaultdict
 from typing import List
 
 
-class LazyTif(np.ndarray):
+class LazyTif(object):
     """
     Holds metadata for a tif and a reference to the image data, but does not read the data from disk until requested.
 
@@ -21,8 +21,9 @@ class LazyTif(np.ndarray):
         self._z_offset = z_offset
 
     @property
-    def image_data(self):
-        return self._image_reference.asarray()
+    def as_image(self):
+        return Image(self._image_reference.asarray(), self.frame, self.timestamp, self.field_of_view,
+                     self.channel, self.z_offset)
 
     @property
     def index(self) -> str:

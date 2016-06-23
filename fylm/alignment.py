@@ -44,7 +44,7 @@ def _get_normalized_primary_images(brightfield_channel: str,
     for tif in tifs:
         is_primary_image = tif.frame == 0 and tif.z_offset == 0 and tif.channel == brightfield_channel
         if is_primary_image:
-            normalized_image = _normalize_image(tif.image_data, device)
+            normalized_image = _normalize_image(tif.as_image, device)
             yield Image(normalized_image, tif.frame, tif.timestamp,
                         tif.field_of_view, tif.channel, tif.z_offset)
 
@@ -71,7 +71,7 @@ def _make_rotated_missing_images(images: Iterable[Image],
     for normalized_image in images:
         # calculate how much we should rotate the image
         rotation = rotation_calculator.calculate(normalized_image)
-        return Image.combine(transform.rotate(normalized_image, rotation), normalized_image), rotation
+        yield Image.combine(transform.rotate(normalized_image, rotation), normalized_image), rotation
 
 
 def get_new_nonfirst_brightfield_focused_images(tifs: Iterable[LazyTif],
@@ -88,8 +88,7 @@ def get_new_nonfirst_brightfield_focused_images(tifs: Iterable[LazyTif],
 def get_rotation_calculator(device: Device) -> rotate.RotationCalculator:
     calculator = {device.original: rotate.FYLMRotationCalc,
                   device.plinko: rotate.PlinkoRotationCalc,
-                  device.cerevisiae: rotate.CerevisiaeRotationCalc,
-                  device.hexaplex: rotate.FYLMRotationCalc}
+                  device.cerevisiae: rotate.CerevisiaeRotationCalc}
     return calculator[device](device)
 
 

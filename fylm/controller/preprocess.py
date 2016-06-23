@@ -29,17 +29,17 @@ def main(tif_directory: str, hdf5_filename: str, device: Device, brightfield_cha
         # Go back and make sure we have all the registered images
         tifs = alignment.load_tifs(tif_directory)
         signal_registration = True
-        for image in alignment.get_new_nonfirst_brightfield_focused_images(tifs,
+        for tif in alignment.get_new_nonfirst_brightfield_focused_images(tifs,
                                                                            brightfield_channel,
                                                                            image_stack):
             if signal_registration:
                 log.debug("Registering images.")
             signal_registration = False
 
-            rotation = rotated_images[image.field_of_view].rotation
-            source_image = rotated_images[image.field_of_view].image
-            registered_image = alignment.make_registered_image(image, device, rotation, source_image)
-            image_stack[image.index] = registered_image
-            image_stack[image.index].attrs['rotation'] = image.rotation
-            image_stack[image.index].attrs['registration'] = image.registration
+            rotation = rotated_images[tif.field_of_view].rotation
+            source_image = rotated_images[tif.field_of_view].image
+            registered_image = alignment.make_registered_image(tif.as_image, device, rotation, source_image)
+            image_stack[tif.index] = registered_image
+            image_stack[tif.index].attrs['rotation'] = registered_image.rotation
+            image_stack[tif.index].attrs['registration'] = registered_image.registration
     log.debug("Done creating aligned images.")

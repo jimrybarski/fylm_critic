@@ -32,7 +32,7 @@ class FYLMRotationCalc(RotationCalculator):
 
     """
     def __init__(self, device: Device):
-        assert device in (Device.original, Device.hexaplex)
+        assert device == Device.original
 
     def calculate(self, image: np.ndarray, disk_size: int=9,
                   mean_threshold: int=100, min_object_size: int=750) -> float:
