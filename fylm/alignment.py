@@ -21,7 +21,7 @@ class AdjustedImage(object):
     def __init__(self, image: Image, rotation: float, registration: Tuple[float, float]=(0, 0)):
         self.image = image
         self.rotation = rotation
-        self.registration = registration
+        self.registration = np.array(registration)
 
 
 def create_missing_rotated_images(brightfield_channel: str,

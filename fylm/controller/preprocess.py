@@ -39,7 +39,7 @@ def main(tif_directory: str, hdf5_filename: str, device: Device, brightfield_cha
             rotation = rotated_images[tif.field_of_view].rotation
             source_image = rotated_images[tif.field_of_view].image
             registered_image = alignment.make_registered_image(tif.as_image, device, rotation, source_image)
-            image_stack[tif.index] = registered_image
+            image_stack[tif.index] = registered_image.image
             image_stack[tif.index].attrs['rotation'] = registered_image.rotation
             image_stack[tif.index].attrs['registration'] = registered_image.registration
     log.debug("Done creating aligned images.")
